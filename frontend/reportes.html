@@ -24,6 +24,21 @@
             position: fixed;
             width: 250px;
             z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
         }
         
         .sidebar .nav-link {
@@ -82,8 +97,21 @@
     </style>
 </head>
 <body class="bg-light">
+    <!-- Mobile Header -->
+    <div class="d-md-none bg-primary text-white p-3 position-sticky top-0" style="z-index: 1050;">
+        <div class="d-flex justify-content-between align-items-center">
+            <button class="btn btn-outline-light btn-sm" type="button" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h6 class="mb-0 fw-bold">
+                <i class="fas fa-chart-bar me-2"></i>Reportes
+            </h6>
+            <div style="width: 40px;"></div>
+        </div>
+    </div>
+
     <!-- Sidebar -->
-    <nav class="sidebar d-flex flex-column position-fixed" style="width: 250px; height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); z-index: 1000;">
+    <nav id="sidebar" class="sidebar d-flex flex-column position-fixed" style="width: 250px; height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); z-index: 1000;">
         <div class="p-4 text-center text-white border-bottom border-secondary">
             <div class="mb-2">
                 <i class="fas fa-piggy-bank fa-2x text-warning"></i>
@@ -791,6 +819,29 @@
                 window.location.href = '../index.html';
             }, 1000);
         }
+
+        // Funciones para sidebar móvil
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const mobileHeader = document.querySelector('.d-md-none');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !mobileHeader.contains(event.target) &&
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.getElementById('sidebar').classList.remove('show');
+            }
+        });
     </script>
 
     <style>
