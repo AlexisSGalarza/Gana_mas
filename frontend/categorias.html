@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categorías - Ahorrando Gano</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📂</text></svg>">
+    
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+    <!-- Sidebar -->
+    <nav class="sidebar d-flex flex-column position-fixed" style="width: 250px; height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); z-index: 1000;">
+        <div class="p-4 text-center text-white border-bottom border-secondary">
+            <div class="mb-2">
+                <i class="fas fa-piggy-bank fa-2x text-warning"></i>
+            </div>
+            <h6 class="mb-0 fw-bold">Ahorrando Gano</h6>
+        </div>
+        
+        <ul class="nav nav-pills flex-column flex-grow-1 p-3">
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="dashboard.html" style="border-radius: 8px;">
+                    <i class="fas fa-chart-line me-3"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="transacciones.html" style="border-radius: 8px;">
+                    <i class="fas fa-exchange-alt me-3"></i>Transacciones
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white active" href="categorias.html" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-tags me-3"></i>Categorías
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="reportes.html" style="border-radius: 8px;">
+                    <i class="fas fa-chart-bar me-3"></i>Reportes
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="perfil.html" style="border-radius: 8px;">
+                    <i class="fas fa-user me-3"></i>Perfil
+                </a>
+            </li>
+        </ul>
+        
+        <div class="p-3 border-top border-secondary">
+            <button class="btn btn-outline-light btn-sm w-100" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" style="margin-left: 250px; min-height: 100vh;">
+        <div class="bg-white shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">📂 Gestión de Categorías</h2>
+                    <p class="text-muted mb-0">Organiza tus transacciones</p>
+                </div>
+                <button class="btn btn-primary" onclick="showNewCategoryModal()">
+                    <i class="fas fa-plus me-2"></i>Nueva Categoría
+                </button>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row" id="categoriesContainer">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-3 text-muted">Cargando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="categoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryModalTitle">Nueva Categoría</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="categoryForm">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="categoryName" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="categoryType" class="form-label">Tipo</label>
+                            <select class="form-select" id="categoryType" required>
+                                <option value="">Selecciona un tipo</option>
+                                <option value="income">💰 Ingreso</option>
+                                <option value="expense">💸 Gasto</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="categoryColor" class="form-label">Color</label>
+                            <input type="color" class="form-control form-control-color" id="categoryColor" value="#6366f1">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Icono</label>
+                            <div class="text-center">
+                                <div id="selectedIcon" class="fs-1 mb-2">📁</div>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="showIconPicker()">
+                                    Cambiar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="iconPicker" class="d-none">
+                            <div class="row g-2">
+                                <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100" onclick="selectIcon('🍕')">🍕</button></div>
+                                <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100" onclick="selectIcon('🚗')">🚗</button></div>
+                                <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100" onclick="selectIcon('🎬')">🎬</button></div>
+                                <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100" onclick="selectIcon('💊')">💊</button></div>
+                                <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100" onclick="selectIcon('📚')">📚</button></div>
+                                <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100" onclick="selectIcon('💰')">💰</button></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCategory()">
+                        <span id="saveButtonText">Crear</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        let editingCategoryId = null;
+        let selectedIconValue = '📁';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Iniciando categorías...');
+            
+            if (!window.AhorrandoGano) {
+                console.error('AhorrandoGano no disponible');
+                showError('Sistema no disponible');
+                return;
+            }
+
+            if (!window.AhorrandoGano.UserManager.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            loadCategories();
+        });
+
+        function showError(message) {
+            document.getElementById('categoriesContainer').innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <div class="alert alert-danger">
+                        <h5>Error</h5>
+                        <p>${message}</p>
+                        <button class="btn btn-primary" onclick="location.reload()">Reintentar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadCategories() {
+            try {
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                let categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+                
+                if (categories.length === 0) {
+                    console.log('Creando categorías predeterminadas...');
+                    window.AhorrandoGano.CategoryManager.initDefaultCategories(user.id);
+                    categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+                }
+
+                renderCategories(categories);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error al cargar categorías: ' + error.message);
+            }
+        }
+
+        function renderCategories(categories) {
+            const container = document.getElementById('categoriesContainer');
+            
+            if (categories.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-tags fa-4x mb-3 opacity-25"></i>
+                        <h5>No hay categorías</h5>
+                        <button class="btn btn-primary" onclick="showNewCategoryModal()">
+                            <i class="fas fa-plus me-2"></i>Crear Primera Categoría
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="col-12"><div class="row">';
+            
+            categories.forEach(category => {
+                const typeClass = category.type === 'income' ? 'success' : 'danger';
+                const typeText = category.type === 'income' ? 'Ingreso' : 'Gasto';
+                
+                html += `
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <span class="fs-1" style="color: ${category.color}">${category.icon}</span>
+                                </div>
+                                <h6 class="card-title">${category.name}</h6>
+                                <span class="badge bg-${typeClass} mb-3">${typeText}</span>
+                                
+                                <div class="btn-group w-100">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="editCategory('${category.id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    ${!category.isDefault ? `
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteCategory('${category.id}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            container.innerHTML = html;
+        }
+
+        function showNewCategoryModal() {
+            editingCategoryId = null;
+            selectedIconValue = '📁';
+            
+            document.getElementById('categoryModalTitle').textContent = 'Nueva Categoría';
+            document.getElementById('saveButtonText').textContent = 'Crear';
+            document.getElementById('categoryForm').reset();
+            document.getElementById('categoryColor').value = '#6366f1';
+            document.getElementById('selectedIcon').textContent = '📁';
+            document.getElementById('iconPicker').classList.add('d-none');
+            
+            const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
+            modal.show();
+        }
+
+        function editCategory(categoryId) {
+            const user = window.AhorrandoGano.UserManager.getCurrentUser();
+            const categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+            const category = categories.find(cat => cat.id === categoryId);
+            
+            if (!category) {
+                window.AhorrandoGano.Utils.showNotification('Categoría no encontrada', 'error');
+                return;
+            }
+
+            editingCategoryId = categoryId;
+            selectedIconValue = category.icon;
+            
+            document.getElementById('categoryModalTitle').textContent = 'Editar Categoría';
+            document.getElementById('saveButtonText').textContent = 'Actualizar';
+            document.getElementById('categoryName').value = category.name;
+            document.getElementById('categoryType').value = category.type;
+            document.getElementById('categoryColor').value = category.color;
+            document.getElementById('selectedIcon').textContent = category.icon;
+            
+            const modal = new bootstrap.Modal(document.getElementById('categoryModal'));
+            modal.show();
+        }
+
+        async function deleteCategory(categoryId) {
+            try {
+                const result = await Swal.fire({
+                    title: '¿Eliminar categoría?',
+                    text: 'Esta acción no se puede deshacer',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (result.isConfirmed) {
+                    const deleteResult = window.AhorrandoGano.CategoryManager.deleteCategory(categoryId);
+                    
+                    if (deleteResult.success) {
+                        window.AhorrandoGano.Utils.showNotification('Categoría eliminada correctamente', 'success');
+                        loadCategories();
+                    } else {
+                        window.AhorrandoGano.Utils.showNotification('Error: ' + deleteResult.error, 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error eliminando categoría:', error);
+                window.AhorrandoGano.Utils.showNotification('Error al eliminar categoría', 'error');
+            }
+        }
+
+        function saveCategory() {
+            const name = document.getElementById('categoryName').value.trim();
+            const type = document.getElementById('categoryType').value;
+            const color = document.getElementById('categoryColor').value;
+            const icon = selectedIconValue;
+
+            if (!name || !type) {
+                window.AhorrandoGano.Utils.showNotification('Completa todos los campos', 'warning');
+                return;
+            }
+
+            try {
+                const categoryData = { name, type, color, icon };
+                let result;
+
+                if (editingCategoryId) {
+                    result = window.AhorrandoGano.CategoryManager.updateCategory(editingCategoryId, categoryData);
+                } else {
+                    result = window.AhorrandoGano.CategoryManager.createCategory(categoryData);
+                }
+
+                if (result.success) {
+                    window.AhorrandoGano.Utils.showNotification('Categoría guardada', 'success');
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
+                    modal.hide();
+                    loadCategories();
+                } else {
+                    window.AhorrandoGano.Utils.showNotification('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                window.AhorrandoGano.Utils.showNotification('Error al guardar', 'error');
+            }
+        }
+
+        function showIconPicker() {
+            document.getElementById('iconPicker').classList.toggle('d-none');
+        }
+
+        function selectIcon(icon) {
+            selectedIconValue = icon;
+            document.getElementById('selectedIcon').textContent = icon;
+            document.getElementById('iconPicker').classList.add('d-none');
+        }
+
+        function logout() {
+            window.AhorrandoGano.UserManager.logout();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

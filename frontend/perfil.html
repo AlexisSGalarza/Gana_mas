@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Finanzas</title>
+    
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous">
+    
+    <!-- SweetAlert2 CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css">
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            position: fixed;
+            width: 250px;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 15px 20px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 20px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 0;
+        }
+        
+        .profile-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout-section {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Sidebar -->
+    <nav class="sidebar d-flex flex-column position-fixed" style="width: 250px; height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); z-index: 1000;">
+        <div class="p-4 text-center text-white border-bottom border-secondary">
+            <div class="mb-2">
+                <i class="fas fa-piggy-bank fa-2x text-warning"></i>
+            </div>
+            <h6 class="mb-0 fw-bold">Ahorrando Gano</h6>
+        </div>
+        
+        <ul class="nav nav-pills flex-column flex-grow-1 p-3">
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="dashboard.html" style="border-radius: 8px;">
+                    <i class="fas fa-chart-line me-3"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="transacciones.html" style="border-radius: 8px;">
+                    <i class="fas fa-exchange-alt me-3"></i>Transacciones
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="categorias.html" style="border-radius: 8px;">
+                    <i class="fas fa-tags me-3"></i>Categorías
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="reportes.html" style="border-radius: 8px;">
+                    <i class="fas fa-chart-bar me-3"></i>Reportes
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white active" href="perfil.html" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-user me-3"></i>Perfil
+                </a>
+            </li>
+        </ul>
+        
+        <div class="p-3 border-top border-secondary">
+            <button class="btn btn-outline-light btn-sm w-100" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" style="margin-left: 250px; min-height: 100vh;">
+        <!-- Header -->
+        <div class="bg-white shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">👤 Mi Perfil</h2>
+                    <p class="text-muted mb-0">Gestiona tu información personal y configuración de cuenta</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="container-fluid px-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="fw-bold" style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    <i class="fas fa-user-circle me-2"></i>
+                    Mi Perfil
+                </h2>
+                <p class="text-muted mb-0">Gestiona tu información personal y configuración de cuenta</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Información del perfil -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="profile-avatar mb-3">
+                            <div class="avatar-circle mx-auto" style="width: 120px; height: 120px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user fa-4x text-white"></i>
+                            </div>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-1" id="profileFullName">Usuario</h5>
+                        <p class="text-muted mb-3" id="profileEmail">email@ejemplo.com</p>
+                        
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="fw-bold" id="totalTransactions">0</div>
+                                <small class="text-muted">Transacciones</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold" id="accountAge">0</div>
+                                <small class="text-muted">Días activo</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fw-bold" id="totalCategories">0</div>
+                                <small class="text-muted">Categorías</small>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="showEditProfileModal()">
+                                <i class="fas fa-edit me-2"></i>
+                                Editar Perfil
+                            </button>
+                            <button class="btn btn-warning" onclick="showChangePasswordModal()">
+                                <i class="fas fa-key me-2"></i>
+                                Cambiar Contraseña
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas rápidas -->
+                <div class="card mt-4">
+                    <div class="card-header" style="background: var(--gradient-info);">
+                        <h6 class="mb-0 text-white">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Resumen Financiero
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">Balance Actual</small>
+                                <strong id="currentBalance">$0.00</strong>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" id="balanceProgress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">Ingresos del mes</small>
+                                <strong id="monthlyIncome">$0.00</strong>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-info" id="incomeProgress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">Gastos del mes</small>
+                                <strong id="monthlyExpenses">$0.00</strong>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-warning" id="expensesProgress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuraciones y preferencias -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            Configuración de Cuenta
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nombre</label>
+                                <input type="text" class="form-control" id="firstName" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Apellido</label>
+                                <input type="text" class="form-control" id="lastName" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" class="form-control" id="email" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Fecha de registro</label>
+                                <input type="text" class="form-control" id="createdAt" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actividad reciente -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-history me-2"></i>
+                            Actividad Reciente
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <!-- La actividad se carga dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gestión de datos -->
+                <div class="card">
+                    <div class="card-header bg-warning text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-database me-2"></i>
+                            Gestión de Datos
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="d-grid">
+                                    <button class="btn btn-info" onclick="exportAllData()">
+                                        <i class="fas fa-download me-2"></i>
+                                        Exportar Datos
+                                    </button>
+                                </div>
+                                <small class="text-muted">Descargar todas tus transacciones</small>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-grid">
+                                    <button class="btn btn-warning" onclick="showDataManagementModal()">
+                                        <i class="fas fa-broom me-2"></i>
+                                        Limpiar Datos
+                                    </button>
+                                </div>
+                                <small class="text-muted">Eliminar datos antiguos</small>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-grid">
+                                    <button class="btn btn-danger" onclick="showDeleteAccountModal()">
+                                        <i class="fas fa-trash me-2"></i>
+                                        Eliminar Cuenta
+                                    </button>
+                                </div>
+                                <small class="text-muted">Eliminar permanentemente</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Perfil -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Perfil
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProfileForm">
+                        <div class="mb-3">
+                            <label for="editFirstName" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="editFirstName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLastName" class="form-label">Apellido *</label>
+                            <input type="text" class="form-control" id="editLastName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="editEmail" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProfile()">
+                        <i class="fas fa-save me-2"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar Contraseña -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key me-2"></i>
+                        Cambiar Contraseña
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Contraseña Actual *</label>
+                            <input type="password" class="form-control" id="currentPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nueva Contraseña *</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirmar Nueva Contraseña *</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" onclick="changePassword()">
+                        <i class="fas fa-key me-2"></i>
+                        Cambiar Contraseña
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.js"></script>
+    
+    <!-- Aplicación principal -->
+    <script src="js/main.js"></script>
+    <script src="js/utils.js"></script>
+    
+    <script>
+        let currentUser = null;
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esperar a que window.AhorrandoGano esté disponible
+            function initWhenReady() {
+                if (window.AhorrandoGano && window.AhorrandoGano.UserManager) {
+                    // Verificar autenticación
+                    if (!window.AhorrandoGano.UserManager.isLoggedIn()) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    currentUser = window.AhorrandoGano.UserManager.getCurrentUser();
+                    if (!currentUser) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    
+                    initializeProfile();
+                } else {
+                    setTimeout(initWhenReady, 100);
+                }
+            }
+            initWhenReady();
+        });
+        
+        function initializeProfile() {
+            try {
+                // Llenar formulario con datos del usuario
+                const firstNameEl = document.getElementById('firstName');
+                const lastNameEl = document.getElementById('lastName');
+                const emailEl = document.getElementById('email');
+                const createdAtEl = document.getElementById('createdAt');
+                
+                if (firstNameEl) firstNameEl.value = currentUser.name || currentUser.firstName || '';
+                if (lastNameEl) lastNameEl.value = currentUser.lastName || '';
+                if (emailEl) emailEl.value = currentUser.email || '';
+                if (createdAtEl) createdAtEl.value = window.AhorrandoGano.Utils.formatDate(currentUser.createdAt);
+
+                // Calcular y mostrar estadísticas
+                updateStatistics();
+                loadRecentTransactions();
+            } catch (error) {
+                console.error('Error inicializando perfil:', error);
+                window.AhorrandoGano.Utils.showNotification('Error cargando perfil', 'error');
+            }
+        }
+
+        function updateStatistics() {
+            try {
+                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(currentUser.id);
+                
+                // Calcular balance manualmente
+                const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+                const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+                const balance = income - expenses;
+
+                // Mostrar estadísticas principales
+                const totalTransactionsEl = document.getElementById('totalTransactions');
+                const totalCategoriesEl = document.getElementById('totalCategories');
+                const currentBalanceEl = document.getElementById('currentBalance');
+                
+                if (totalTransactionsEl) totalTransactionsEl.textContent = transactions.length;
+                if (totalCategoriesEl) totalCategoriesEl.textContent = categories.length;
+                if (currentBalanceEl) currentBalanceEl.textContent = window.AhorrandoGano.Utils.formatCurrency(balance);
+
+                // Calcular ingresos y gastos del mes actual
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+                
+                const monthlyTransactions = transactions.filter(transaction => {
+                    const transactionDate = new Date(transaction.date);
+                    return transactionDate.getMonth() === currentMonth && 
+                           transactionDate.getFullYear() === currentYear;
+                });
+
+                const monthlyIncome = monthlyTransactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+                
+                const monthlyExpenses = monthlyTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+                const monthlyIncomeEl = document.getElementById('monthlyIncome');
+                const monthlyExpensesEl = document.getElementById('monthlyExpenses');
+                
+                if (monthlyIncomeEl) monthlyIncomeEl.textContent = window.AhorrandoGano.Utils.formatCurrency(monthlyIncome);
+                if (monthlyExpensesEl) monthlyExpensesEl.textContent = window.AhorrandoGano.Utils.formatCurrency(monthlyExpenses);
+            } catch (error) {
+                console.error('Error actualizando estadísticas:', error);
+            }
+        }
+
+        function loadRecentTransactions() {
+            try {
+                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(currentUser.id);
+                
+                const recentTransactions = transactions
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 5);
+
+                const container = document.getElementById('recentActivity');
+                if (!container) {
+                    console.warn('Elemento recentActivity no encontrado');
+                    return;
+                }
+
+                if (recentTransactions.length === 0) {
+                    container.innerHTML = '<p class="text-muted">No hay transacciones recientes</p>';
+                    return;
+                }
+
+                let html = '';
+                recentTransactions.forEach(transaction => {
+                    const category = categories.find(c => c.id === transaction.categoryId);
+                    const categoryName = category ? category.name : 'Sin categoría';
+                    const typeClass = transaction.type === 'income' ? 'text-success' : 'text-danger';
+                    const sign = transaction.type === 'income' ? '+' : '-';
+                    
+                    html += `
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <div class="fw-bold">${transaction.description}</div>
+                                <small class="text-muted">${categoryName} • ${window.AhorrandoGano.Utils.formatDate(transaction.date)}</small>
+                            </div>
+                            <div class="${typeClass} fw-bold">
+                                ${sign}${window.AhorrandoGano.Utils.formatCurrency(transaction.amount)}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando transacciones recientes:', error);
+            }
+        }
+
+        function updateStatistics() {
+            try {
+                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
+                const categories = window.AhorrandoGano.TransactionManager.getCategories();
+                
+                // Verificar que los elementos existan antes de usarlos
+                const totalTransactionsEl = document.getElementById('totalTransactions');
+                const totalCategoriesEl = document.getElementById('totalCategories');
+                const currentBalanceEl = document.getElementById('currentBalance');
+                const monthlyIncomeEl = document.getElementById('monthlyIncome');
+                const monthlyExpensesEl = document.getElementById('monthlyExpenses');
+                
+                if (!totalTransactionsEl || !totalCategoriesEl || !currentBalanceEl || !monthlyIncomeEl || !monthlyExpensesEl) {
+                    console.warn('Algunos elementos de estadísticas no se encontraron en el DOM');
+                    return;
+                }
+
+                // Calcular balance
+                const balance = window.AhorrandoGano.TransactionManager.calculateBalance(currentUser.id);
+                
+                // Estadísticas básicas
+                totalTransactionsEl.textContent = transactions.length;
+                totalCategoriesEl.textContent = categories.length;
+                currentBalanceEl.textContent = window.AhorrandoGano.Utils.formatCurrency(balance.balance);
+                
+                // Calcular transacciones del mes actual
+                const now = new Date();
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                const monthTransactions = transactions.filter(t => new Date(t.date) >= monthStart);
+                
+                const monthlyIncome = monthTransactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+                
+                const monthlyExpenses = monthTransactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+                monthlyIncomeEl.textContent = window.AhorrandoGano.Utils.formatCurrency(monthlyIncome);
+                monthlyExpensesEl.textContent = window.AhorrandoGano.Utils.formatCurrency(monthlyExpenses);
+
+                // Actualizar barras de progreso si existen
+                const balanceProgressEl = document.getElementById('balanceProgress');
+                const incomeProgressEl = document.getElementById('incomeProgress');
+                const expensesProgressEl = document.getElementById('expensesProgress');
+                
+                const maxAmount = Math.max(monthlyIncome, monthlyExpenses, Math.abs(balance.balance));
+                if (maxAmount > 0 && balanceProgressEl && incomeProgressEl && expensesProgressEl) {
+                    balanceProgressEl.style.width = Math.min(100, (Math.abs(balance.balance) / maxAmount) * 100) + '%';
+                    incomeProgressEl.style.width = (monthlyIncome / maxAmount) * 100 + '%';
+                    expensesProgressEl.style.width = (monthlyExpenses / maxAmount) * 100 + '%';
+                }
+            } catch (error) {
+                console.error('Error actualizando estadísticas:', error);
+            }
+        }
+
+        function loadRecentActivity() {
+            try {
+                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
+                const categories = window.AhorrandoGano.TransactionManager.getCategories();
+                
+                const containerEl = document.getElementById('recentActivity');
+                if (!containerEl) {
+                    console.warn('Elemento recentActivity no encontrado');
+                    return;
+                }
+                
+                // Obtener las últimas 5 transacciones
+                const recentTransactions = transactions
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .slice(0, 5);
+
+                if (recentTransactions.length === 0) {
+                    containerEl.innerHTML = '<p class="text-muted text-center">No hay actividad reciente</p>';
+                    return;
+                }
+
+                const html = recentTransactions.map(transaction => {
+                    const category = categories.find(c => c.id === transaction.categoryId);
+                    const categoryName = category ? category.name : 'Sin categoría';
+                    const typeClass = transaction.type === 'income' ? 'success' : 'danger';
+                    const typeIcon = transaction.type === 'income' ? 'fa-arrow-up' : 'fa-arrow-down';
+                    
+                    return `
+                        <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                            <div class="me-3">
+                                <div class="bg-${typeClass} rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px;">
+                                    <i class="fas ${typeIcon} text-white"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">${transaction.description}</div>
+                                <small class="text-muted">${categoryName} • ${window.AhorrandoGano.Utils.formatDate(transaction.date)}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-${typeClass}">
+                                    ${transaction.type === 'expense' ? '-' : '+'}${window.AhorrandoGano.Utils.formatCurrency(transaction.amount)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                containerEl.innerHTML = html;
+            } catch (error) {
+                console.error('Error cargando transacciones recientes:', error);
+            }
+        }
+
+        function loadRecentActivity() {
+            const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
+            const categories = window.AhorrandoGano.TransactionManager.getCategories();
+            
+            // Obtener las últimas 5 transacciones
+            const recentTransactions = transactions
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 5);
+
+            if (recentTransactions.length === 0) {
+                document.getElementById('recentActivity').innerHTML = 
+                    '<p class="text-muted text-center">No hay actividad reciente</p>';
+                return;
+            }
+
+            const html = recentTransactions.map(transaction => {
+                const category = categories.find(c => c.id === transaction.categoryId);
+                const categoryName = category ? category.name : 'Sin categoría';
+                const typeClass = transaction.type === 'income' ? 'success' : 'danger';
+                const typeIcon = transaction.type === 'income' ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                return `
+                    <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                        <div class="me-3">
+                            <div class="bg-${typeClass} rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas ${typeIcon} text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">${transaction.description}</div>
+                            <small class="text-muted">${categoryName} • ${window.AhorrandoGano.Utils.formatDate(transaction.date)}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-${typeClass}">
+                                ${transaction.type === 'expense' ? '-' : '+'}${window.AhorrandoGano.Utils.formatCurrency(transaction.amount)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('recentActivity').innerHTML = html;
+        }
+
+        function showEditProfileModal() {
+            document.getElementById('editFirstName').value = currentUser.firstName;
+            document.getElementById('editLastName').value = currentUser.lastName;
+            document.getElementById('editEmail').value = currentUser.email;
+            
+            const modal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+            modal.show();
+        }
+
+        function saveProfile() {
+            const form = document.getElementById('editProfileForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const newData = {
+                firstName: document.getElementById('editFirstName').value.trim(),
+                lastName: document.getElementById('editLastName').value.trim(),
+                email: document.getElementById('editEmail').value.trim()
+            };
+
+            // Validar email
+            if (!window.AhorrandoGano.Utils.isValidEmail(newData.email)) {
+                window.AhorrandoGano.Utils.showNotification('Por favor ingresa un email válido', 'warning');
+                return;
+            }
+
+            // Verificar si el email ya existe (si cambió)
+            if (newData.email !== currentUser.email) {
+                const users = Storage.load(APP_CONFIG.storage.users, []);
+                if (users.some(u => u.email === newData.email && u.id !== currentUser.id)) {
+                    window.AhorrandoGano.Utils.showNotification('Este email ya está en uso', 'error');
+                    return;
+                }
+            }
+
+            try {
+                // Actualizar usuario
+                const result = window.AhorrandoGano.UserManager.updateUser(currentUser.id, newData);
+                if (result.success) {
+                    // Actualizar usuario actual
+                    currentUser = result.user;
+                    window.AhorrandoGano.UserManager.setCurrentUser(currentUser);
+                    
+                    // Recargar datos
+                    loadUserData();
+                    
+                    // Cerrar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+                    modal.hide();
+                    
+                    window.AhorrandoGano.Utils.showNotification('Perfil actualizado correctamente', 'success');
+                } else {
+                    window.AhorrandoGano.Utils.showNotification('Error al actualizar perfil: ' + result.error, 'error');
+                }
+            } catch (error) {
+                window.AhorrandoGano.Utils.showNotification('Error al actualizar perfil', 'error');
+            }
+        }
+
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+            modal.show();
+        }
+
+        function changePassword() {
+            const form = document.getElementById('changePasswordForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validar contraseña actual
+            if (window.AhorrandoGano.Utils.simpleHash(currentPassword) !== currentUser.password) {
+                window.AhorrandoGano.Utils.showNotification('La contraseña actual es incorrecta', 'error');
+                return;
+            }
+
+            // Validar nueva contraseña
+            const passwordValidation = window.AhorrandoGano.Utils.password(newPassword);
+            if (!passwordValidation.isValid) {
+                window.AhorrandoGano.Utils.showNotification(passwordValidation.message, 'warning');
+                return;
+            }
+
+            // Confirmar contraseña
+            if (newPassword !== confirmPassword) {
+                window.AhorrandoGano.Utils.showNotification('Las contraseñas no coinciden', 'warning');
+                return;
+            }
+
+            try {
+                // Actualizar contraseña
+                const result = window.AhorrandoGano.UserManager.updateUser(currentUser.id, {
+                    password: window.AhorrandoGano.Utils.simpleHash(newPassword)
+                });
+                
+                if (result.success) {
+                    currentUser = result.user;
+                    
+                    // Cerrar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                    modal.hide();
+                    
+                    window.AhorrandoGano.Utils.showNotification('Contraseña actualizada correctamente', 'success');
+                } else {
+                    window.AhorrandoGano.Utils.showNotification('Error al cambiar contraseña: ' + result.error, 'error');
+                }
+            } catch (error) {
+                window.AhorrandoGano.Utils.showNotification('Error al cambiar contraseña', 'error');
+            }
+        }
+
+        function exportAllData() {
+            const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
+            const categories = window.AhorrandoGano.TransactionManager.getCategories();
+            
+            if (transactions.length === 0) {
+                window.AhorrandoGano.Utils.showNotification('No tienes transacciones para exportar', 'warning');
+                return;
+            }
+
+            const csv = window.AhorrandoGano.Utils.transactionsToCSV(transactions, categories);
+            const fileName = `mi_historial_financiero_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            window.AhorrandoGano.Utils.downloadFile(csv, fileName);
+            window.AhorrandoGano.Utils.showNotification(`${transactions.length} transacciones exportadas correctamente`, 'success');
+        }
+
+        async function showDataManagementModal() {
+            const result = await window.AhorrandoGano.Utils.confirmAction(
+                'Esta acción eliminará todas las transacciones anteriores a 6 meses. ¿Continuar?',
+                '¿Limpiar datos antiguos?'
+            );
+
+            if (result) {
+                // Implementar lógica de limpieza
+                window.AhorrandoGano.Utils.showNotification('Funcionalidad de limpieza en desarrollo', 'info');
+            }
+        }
+
+        async function showDeleteAccountModal() {
+            const result = await window.AhorrandoGano.Utils.confirmAction(
+                'Esta acción eliminará permanentemente tu cuenta y todos tus datos. Esta acción NO se puede deshacer.',
+                '¿ELIMINAR CUENTA PERMANENTEMENTE?'
+            );
+
+            if (result) {
+                try {
+                    // Eliminar cuenta
+                    window.AhorrandoGano.UserManager.deleteUser(currentUser.id);
+                    window.AhorrandoGano.Utils.showNotification('Cuenta eliminada correctamente', 'success');
+                    
+                    // Redirigir al login
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } catch (error) {
+                    window.AhorrandoGano.Utils.showNotification('Error al eliminar cuenta', 'error');
+                }
+            }
+        }
+
+        function logout() {
+            window.AhorrandoGano.Utils.showNotification('Cerrando sesión...', 'info');
+            setTimeout(() => {
+                window.AhorrandoGano.UserManager.logout();
+                window.location.href = '../index.html';
+            }, 1000);
+        }
+    </script>
+
+    <!-- Mobile Sidebar Offcanvas -->
+    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="sidebarOffcanvas">
+        <div class="offcanvas-header bg-primary text-white">
+            <h5 class="offcanvas-title">
+                <i class="fas fa-piggy-bank me-2"></i>Finanzas
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard.html">
+                        <i class="fas fa-chart-line me-3"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="transacciones.html">
+                        <i class="fas fa-exchange-alt me-3"></i>Transacciones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="categorias.html">
+                        <i class="fas fa-tags me-3"></i>Categorías
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="reportes.html">
+                        <i class="fas fa-chart-bar me-3"></i>Reportes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="perfil.html">
+                        <i class="fas fa-user me-3"></i>Perfil
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <style>
+        .avatar-circle {
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-circle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-control:read-only {
+            background-color: #f8f9fa;
+        }
+    </style>
+</body>
+</html>
+

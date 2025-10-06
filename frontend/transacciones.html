@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transacciones - Finanzas</title>
+    
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous">
+    
+    <!-- SweetAlert2 CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css">
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            position: fixed;
+            width: 250px;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 15px 20px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 20px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 0;
+        }
+        
+        .profile-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout-section {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Sidebar -->
+    <nav class="sidebar d-flex flex-column position-fixed" style="width: 250px; height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); z-index: 1000;">
+        <!-- Logo/Brand -->
+        <div class="p-4 text-center text-white border-bottom border-secondary">
+            <div class="mb-2">
+                <i class="fas fa-piggy-bank fa-2x text-warning"></i>
+            </div>
+            <h6 class="mb-0 fw-bold">Ahorrando Gano</h6>
+        </div>
+        
+        <!-- Navigation Menu -->
+        <ul class="nav nav-pills flex-column flex-grow-1 p-3">
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="dashboard.html" style="border-radius: 8px;">
+                    <i class="fas fa-chart-line me-3"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white active" href="transacciones.html" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-exchange-alt me-3"></i>Transacciones
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="categorias.html" style="border-radius: 8px;">
+                    <i class="fas fa-tags me-3"></i>Categorías
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="reportes.html" style="border-radius: 8px;">
+                    <i class="fas fa-chart-bar me-3"></i>Reportes
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="perfil.html" style="border-radius: 8px;">
+                    <i class="fas fa-user me-3"></i>Perfil
+                </a>
+            </li>
+        </ul>
+        
+        <!-- Footer -->
+        <div class="p-3 border-top border-secondary">
+            <button class="btn btn-outline-light btn-sm w-100" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" style="margin-left: 250px; min-height: 100vh;">
+        <!-- Header -->
+        <div class="bg-white shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">💳 Transacciones</h2>
+                    <p class="text-muted mb-0">Administra todos tus ingresos y gastos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="container-fluid px-4">
+        <!-- Botón para nueva transacción -->
+        <div class="row mb-4">
+            <div class="col-md-12 text-md-end">
+                <button class="btn btn-primary btn-lg" onclick="showTransactionModal()">
+                    <i class="fas fa-plus me-2"></i>
+                    Nueva Transacción
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtros y búsqueda -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="card-title mb-3">
+                    <i class="fas fa-filter me-2"></i>
+                    Filtros y Búsqueda
+                </h6>
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Buscar</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" 
+                                   placeholder="Descripción de la transacción...">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" id="typeFilter">
+                            <option value="">Todos</option>
+                            <option value="income">Ingresos</option>
+                            <option value="expense">Gastos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Categoría</label>
+                        <select class="form-select" id="categoryFilter">
+                            <option value="">Todas las categorías</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                <i class="fas fa-times me-1"></i>
+                                Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filtros de fecha -->
+                <div class="row g-3 mt-2">
+                    <div class="col-md-3">
+                        <label class="form-label">Desde</label>
+                        <input type="date" class="form-control" id="dateFromFilter">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Hasta</label>
+                        <input type="date" class="form-control" id="dateToFilter">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Rango rápido</label>
+                        <select class="form-select" id="quickDateFilter">
+                            <option value="">Personalizado</option>
+                            <option value="today">Hoy</option>
+                            <option value="week">Esta semana</option>
+                            <option value="month">Este mes</option>
+                            <option value="year">Este año</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button class="btn btn-success" onclick="exportTransactions()">
+                                <i class="fas fa-download me-1"></i>
+                                Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen rápido -->
+        <div class="row mb-4" id="quickSummary">
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Ingresos</h6>
+                                <h4 class="mb-0" id="totalIncome">$0.00</h4>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-arrow-up fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Total Gastos</h6>
+                                <h4 class="mb-0" id="totalExpenses">$0.00</h4>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-arrow-down fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Balance</h6>
+                                <h4 class="mb-0" id="netBalance">$0.00</h4>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-balance-scale fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de transacciones -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Lista de Transacciones
+                </h6>
+                <small class="text-muted" id="transactionCount">0 transacciones</small>
+            </div>
+            
+            <div class="card-body p-0">
+                <div id="transactionsList" class="table-responsive">
+                    <!-- Las transacciones se cargarán aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nueva/editar transacción -->
+    <div class="modal fade" id="transactionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="transactionModalTitle">
+                        <i class="fas fa-plus me-2"></i>
+                        Nueva Transacción
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <form id="transactionForm">
+                        <input type="hidden" id="transactionId">
+                        
+                        <!-- Tipo de transacción -->
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de transacción</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="type" id="incomeType" value="income" checked>
+                                <label class="btn btn-outline-success" for="incomeType">
+                                    <i class="fas fa-arrow-up me-1"></i>
+                                    Ingreso
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="type" id="expenseType" value="expense">
+                                <label class="btn btn-outline-danger" for="expenseType">
+                                    <i class="fas fa-arrow-down me-1"></i>
+                                    Gasto
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Monto -->
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Monto *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="amount" 
+                                       step="0.01" min="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Descripción -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Descripción *</label>
+                            <input type="text" class="form-control" id="description" 
+                                   placeholder="Ej: Compra de libros" required>
+                        </div>
+                        
+                        <!-- Categoría -->
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Categoría *</label>
+                            <select class="form-select" id="category" required>
+                                <option value="">Selecciona una categoría</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Fecha -->
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Fecha *</label>
+                            <input type="date" class="form-control" id="date" required>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveTransaction()">
+                        <i class="fas fa-save me-2"></i>
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.js"></script>
+    
+    <!-- Aplicación principal -->
+    <script src="js/main.js"></script>
+    <script src="js/utils.js"></script>
+    
+    <script>
+        // Variables globales para la página
+        let currentTransactions = [];
+        let filteredTransactions = [];
+        let editingTransaction = null;
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esperar a que window.AhorrandoGano esté disponible
+            function initWhenReady() {
+                if (window.AhorrandoGano && window.AhorrandoGano.UserManager) {
+                    // Verificar autenticación
+                    if (!window.AhorrandoGano.UserManager.isLoggedIn()) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    initializePage();
+                    loadTransactions();
+                    setupEventListeners();
+                    
+                    // Forzar recarga de categorías después de un momento
+                    setTimeout(() => {
+                        loadCategoriesIntoSelects();
+                        console.log('Categorías recargadas');
+                    }, 500);
+                } else {
+                    // Reintentar después de 100ms
+                    setTimeout(initWhenReady, 100);
+                }
+            }
+            initWhenReady();
+        });
+
+        function initializePage() {
+            // Mostrar nombre del usuario
+            const user = window.AhorrandoGano.UserManager.getCurrentUser();
+            // Nota: El elemento userName no existe en este HTML
+            // if (user) {
+            //     document.getElementById('userName').textContent = user.firstName;
+            // }
+
+            // Establecer fecha de hoy por defecto
+            document.getElementById('date').valueAsDate = new Date();
+
+            // Cargar categorías en filtros y modal
+            loadCategoriesIntoSelects();
+        }
+
+        function loadCategoriesIntoSelects() {
+            try {
+                if (!window.AhorrandoGano || !window.AhorrandoGano.UserManager) {
+                    console.error('Sistema no disponible');
+                    return;
+                }
+                
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();
+                if (!user) {
+                    console.error('Usuario no encontrado');
+                    return;
+                }
+                
+                let categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+                
+                // Si no hay categorías, crear las predeterminadas
+                if (categories.length === 0) {
+                    window.AhorrandoGano.CategoryManager.initDefaultCategories(user.id);
+                    categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+                }
+                
+                const categoryFilter = document.getElementById('categoryFilter');
+                const categorySelect = document.getElementById('category');
+                
+                if (!categoryFilter || !categorySelect) {
+                    console.error('Elementos de categoría no encontrados');
+                    return;
+                }
+            
+                // Limpiar opciones existentes (excepto la primera)
+                categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+                categorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
+                
+                categories.forEach(category => {
+                    const option1 = new Option(`${category.icon} ${category.name}`, category.id);
+                    const option2 = new Option(`${category.icon} ${category.name}`, category.id);
+                    
+                    categoryFilter.appendChild(option1);
+                    categorySelect.appendChild(option2);
+                });
+                
+                // Configurar filtro dinámico por tipo de transacción usando radio buttons
+                const typeRadios = document.querySelectorAll('input[name="type"]');
+                typeRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        if (this.checked) {
+                            filterCategoriesByType(this.value, categories);
+                        }
+                    });
+                });
+                
+                // Filtrar categorías inicialmente según el tipo seleccionado
+                const selectedType = document.querySelector('input[name="type"]:checked');
+                if (selectedType) {
+                    filterCategoriesByType(selectedType.value, categories);
+                }
+                
+                console.log(`Cargadas ${categories.length} categorías`);
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+                window.AhorrandoGano.Utils.showNotification('Error cargando categorías', 'error');
+            }
+        }
+        
+        function filterCategoriesByType(type, allCategories) {
+            try {
+                const categorySelect = document.getElementById('category');
+                if (!categorySelect || !allCategories) return;
+                
+                // Limpiar opciones
+                categorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
+                
+                // Filtrar categorías por tipo
+                const filteredCategories = type ? 
+                    allCategories.filter(cat => cat.type === type) : 
+                    allCategories;
+                
+                if (filteredCategories.length === 0) {
+                    const option = new Option(`No hay categorías de ${type === 'income' ? 'ingresos' : 'gastos'}`, '');
+                    option.disabled = true;
+                    categorySelect.appendChild(option);
+                } else {
+                    // Agregar categorías filtradas
+                    filteredCategories.forEach(category => {
+                        const option = new Option(`${category.icon} ${category.name}`, category.id);
+                        categorySelect.appendChild(option);
+                    });
+                }
+                
+                console.log(`Filtradas ${filteredCategories.length} categorías para tipo: ${type}`);
+            } catch (error) {
+                console.error('Error filtrando categorías por tipo:', error);
+            }
+        }
+
+        function setupEventListeners() {
+            // Filtros en tiempo real
+            document.getElementById('searchInput').addEventListener('input', window.AhorrandoGano.Utils.debounce(filterTransactions, 300));
+            document.getElementById('typeFilter').addEventListener('change', filterTransactions);
+            document.getElementById('categoryFilter').addEventListener('change', filterTransactions);
+            document.getElementById('dateFromFilter').addEventListener('change', filterTransactions);
+            document.getElementById('dateToFilter').addEventListener('change', filterTransactions);
+            
+            // Filtro de rango rápido de fechas
+            document.getElementById('quickDateFilter').addEventListener('change', function() {
+                const value = this.value;
+                const now = new Date();
+                let from, to;
+                
+                switch(value) {
+                    case 'today':
+                        from = to = now.toISOString().split('T')[0];
+                        break;
+                    case 'week':
+                        from = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0];
+                        to = new Date().toISOString().split('T')[0];
+                        break;
+                    case 'month':
+                        from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                        to = new Date().toISOString().split('T')[0];
+                        break;
+                    case 'year':
+                        from = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+                        to = new Date().toISOString().split('T')[0];
+                        break;
+                    default:
+                        return;
+                }
+                
+                document.getElementById('dateFromFilter').value = from;
+                document.getElementById('dateToFilter').value = to;
+                filterTransactions();
+            });
+
+            // Cambio de tipo en modal
+            document.querySelectorAll('input[name="type"]').forEach(radio => {
+                radio.addEventListener('change', updateCategoriesForType);
+            });
+        }
+
+        function loadTransactions() {
+            const user = window.AhorrandoGano.UserManager.getCurrentUser();
+            if (!user) return;
+
+            currentTransactions = window.AhorrandoGano.TransactionManager.getUserTransactions(user.id);
+            filteredTransactions = [...currentTransactions];
+            
+            updateSummary();
+            renderTransactionsList();
+        }
+
+        function filterTransactions() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const type = document.getElementById('typeFilter').value;
+            const categoryId = document.getElementById('categoryFilter').value;
+            const dateFrom = document.getElementById('dateFromFilter').value;
+            const dateTo = document.getElementById('dateToFilter').value;
+
+            filteredTransactions = currentTransactions.filter(transaction => {
+                // Filtro de búsqueda
+                if (search && !transaction.description.toLowerCase().includes(search)) {
+                    return false;
+                }
+                
+                // Filtro de tipo
+                if (type && transaction.type !== type) {
+                    return false;
+                }
+                
+                // Filtro de categoría
+                if (categoryId && transaction.categoryId !== categoryId) {
+                    return false;
+                }
+                
+                // Filtro de fecha
+                const transactionDate = transaction.date.split('T')[0];
+                if (dateFrom && transactionDate < dateFrom) {
+                    return false;
+                }
+                if (dateTo && transactionDate > dateTo) {
+                    return false;
+                }
+                
+                return true;
+            });
+
+            updateSummary();
+            renderTransactionsList();
+        }
+
+        function updateSummary() {
+            const income = filteredTransactions
+                .filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+            
+            const expenses = filteredTransactions
+                .filter(t => t.type === 'expense')
+                .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+            
+            const balance = income - expenses;
+
+            document.getElementById('totalIncome').textContent = window.AhorrandoGano.Utils.formatCurrency(income);
+            document.getElementById('totalExpenses').textContent = window.AhorrandoGano.Utils.formatCurrency(expenses);
+            document.getElementById('netBalance').textContent = window.AhorrandoGano.Utils.formatCurrency(balance);
+            
+            // Cambiar color del balance según el valor
+            const balanceElement = document.getElementById('netBalance').parentElement.parentElement.parentElement.parentElement;
+            balanceElement.className = balance >= 0 ? 'card bg-info text-white' : 'card bg-warning text-white';
+        }
+
+        function renderTransactionsList() {
+            const container = document.getElementById('transactionsList');
+            const user = window.AhorrandoGano.UserManager.getCurrentUser();
+            const categories = user ? window.AhorrandoGano.CategoryManager.getUserCategories(user.id) : [];
+            
+            if (filteredTransactions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay transacciones que coincidan con los filtros</p>
+                    </div>
+                `;
+                document.getElementById('transactionCount').textContent = '0 transacciones';
+                return;
+            }
+
+            // Ordenar por fecha (más recientes primero)
+            const sortedTransactions = [...filteredTransactions].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+
+            const tableHTML = `
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="10%">Fecha</th>
+                            <th width="35%">Descripción</th>
+                            <th width="20%">Categoría</th>
+                            <th width="10%">Tipo</th>
+                            <th width="15%">Monto</th>
+                            <th width="10%">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sortedTransactions.map(transaction => {
+                            const category = categories.find(c => c.id === transaction.categoryId);
+                            const typeClass = transaction.type === 'income' ? 'success' : 'danger';
+                            const typeIcon = transaction.type === 'income' ? 'fa-arrow-up' : 'fa-arrow-down';
+                            const typeText = transaction.type === 'income' ? 'Ingreso' : 'Gasto';
+                            
+                            return `
+                                <tr>
+                                    <td>
+                                        <small class="text-muted">
+                                            ${window.AhorrandoGano.Utils.formatDate(transaction.date, 'short')}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <strong>${transaction.description}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            ${window.AhorrandoGano.Utils.formatDate(transaction.date)}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            ${category ? category.name : 'Sin categoría'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-${typeClass}">
+                                            <i class="fas ${typeIcon} me-1"></i>
+                                            ${typeText}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-${typeClass}">
+                                            ${transaction.type === 'expense' ? '-' : '+'}${window.AhorrandoGano.Utils.formatCurrency(transaction.amount)}
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="editTransaction('${transaction.id}')" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deleteTransaction('${transaction.id}')" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+            document.getElementById('transactionCount').textContent = 
+                `${filteredTransactions.length} transacción${filteredTransactions.length !== 1 ? 'es' : ''}`;
+        }
+
+        function showTransactionModal() {
+            editingTransaction = null;
+            document.getElementById('transactionModalTitle').innerHTML = 
+                '<i class="fas fa-plus me-2"></i>Nueva Transacción';
+            document.getElementById('transactionForm').reset();
+            document.getElementById('transactionId').value = '';
+            document.getElementById('date').valueAsDate = new Date();
+            
+            // Seleccionar ingreso por defecto
+            document.getElementById('incomeType').checked = true;
+            updateCategoriesForType();
+            
+            const modal = new bootstrap.Modal(document.getElementById('transactionModal'));
+            modal.show();
+        }
+
+        function editTransaction(transactionId) {
+            const transaction = currentTransactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+
+            editingTransaction = transaction;
+            document.getElementById('transactionModalTitle').innerHTML = 
+                '<i class="fas fa-edit me-2"></i>Editar Transacción';
+            
+            // Llenar el formulario
+            document.getElementById('transactionId').value = transaction.id;
+            document.getElementById('amount').value = transaction.amount;
+            document.getElementById('description').value = transaction.description;
+            document.getElementById('category').value = transaction.categoryId;
+            document.getElementById('date').value = transaction.date.split('T')[0];
+            
+            // Seleccionar tipo
+            if (transaction.type === 'income') {
+                document.getElementById('incomeType').checked = true;
+            } else {
+                document.getElementById('expenseType').checked = true;
+            }
+            
+            updateCategoriesForType();
+            
+            const modal = new bootstrap.Modal(document.getElementById('transactionModal'));
+            modal.show();
+        }
+
+        function updateCategoriesForType() {
+            const selectedTypeElement = document.querySelector('input[name="type"]:checked');
+            if (!selectedTypeElement) return;
+            
+            const selectedType = selectedTypeElement.value;
+            const user = window.AhorrandoGano.UserManager.getCurrentUser();
+            const categories = user ? window.AhorrandoGano.CategoryManager.getUserCategories(user.id) : [];
+            const categorySelect = document.getElementById('category');
+            const currentValue = categorySelect.value;
+            
+            // Filtrar categorías por tipo
+            const filteredCategories = categories.filter(cat => cat.type === selectedType);
+            
+            // Actualizar opciones
+            categorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
+            filteredCategories.forEach(category => {
+                const option = new Option(category.name, category.id);
+                categorySelect.appendChild(option);
+            });
+            
+            // Restaurar valor si sigue siendo válido
+            if (filteredCategories.some(cat => cat.id === currentValue)) {
+                categorySelect.value = currentValue;
+            }
+        }
+
+        function saveTransaction() {
+            try {
+                // Verificar usuario
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();
+                if (!user) {
+                    window.AhorrandoGano.Utils.showNotification('Sesión expirada', 'error');
+                    return;
+                }
+
+                // Verificar categorías disponibles
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+                if (categories.length === 0) {
+                    window.AhorrandoGano.Utils.showNotification('No hay categorías disponibles. Creando categorías por defecto...', 'info');
+                    window.AhorrandoGano.CategoryManager.initDefaultCategories(user.id);
+                    loadCategoriesIntoSelects();
+                    return;
+                }
+
+                // Obtener datos del formulario
+                const amount = parseFloat(document.getElementById('amount').value);
+                const description = document.getElementById('description').value.trim();
+                const categoryId = document.getElementById('category').value;
+                const type = document.querySelector('input[name="type"]:checked')?.value;
+                const date = document.getElementById('date').value;
+
+                // Validaciones mejoradas
+                if (!amount || amount <= 0) {
+                    window.AhorrandoGano.Utils.showNotification('Ingresa un monto válido mayor a 0', 'warning');
+                    return;
+                }
+
+                if (!description) {
+                    window.AhorrandoGano.Utils.showNotification('La descripción es obligatoria', 'warning');
+                    return;
+                }
+
+                if (!categoryId) {
+                    window.AhorrandoGano.Utils.showNotification('Debes seleccionar una categoría', 'warning');
+                    return;
+                }
+
+                if (!type) {
+                    window.AhorrandoGano.Utils.showNotification('Debes seleccionar un tipo de transacción', 'warning');
+                    return;
+                }
+
+                if (!date) {
+                    window.AhorrandoGano.Utils.showNotification('La fecha es obligatoria', 'warning');
+                    return;
+                }
+
+                // Verificar que la categoría existe y es del tipo correcto
+                const selectedCategory = categories.find(cat => cat.id === categoryId);
+                if (!selectedCategory) {
+                    window.AhorrandoGano.Utils.showNotification('La categoría seleccionada no es válida', 'error');
+                    return;
+                }
+
+                if (selectedCategory.type !== type) {
+                    window.AhorrandoGano.Utils.showNotification(`La categoría "${selectedCategory.name}" no corresponde al tipo de transacción seleccionado`, 'warning');
+                    return;
+                }
+
+                const transactionData = {
+                    amount: amount,
+                    description: description,
+                    categoryId: categoryId,
+                    type: type,
+                    date: date
+                };
+
+                // Guardar la transacción
+                if (editingTransaction) {
+                    // Actualizar transacción existente
+                    const result = window.AhorrandoGano.TransactionManager.updateTransaction(editingTransaction.id, transactionData);
+                    if (result.success) {
+                        window.AhorrandoGano.Utils.showNotification('Transacción actualizada correctamente', 'success');
+                    } else {
+                        window.AhorrandoGano.Utils.showNotification('Error: ' + result.error, 'error');
+                        return;
+                    }
+                } else {
+                    // Crear nueva transacción
+                    const result = window.AhorrandoGano.TransactionManager.addTransaction(transactionData);
+                    if (result.success) {
+                        window.AhorrandoGano.Utils.showNotification('Transacción creada correctamente', 'success');
+                    } else {
+                        window.AhorrandoGano.Utils.showNotification('Error: ' + result.error, 'error');
+                        return;
+                    }
+                }
+
+                // Cerrar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('transactionModal'));
+                if (modal) {
+                    modal.hide();
+                }
+
+                // Limpiar formulario
+                document.getElementById('transactionForm').reset();
+                document.getElementById('date').valueAsDate = new Date();
+
+                // Recargar lista
+                loadTransactions();
+
+            } catch (error) {
+                console.error('Error en saveTransaction:', error);
+                window.AhorrandoGano.Utils.showNotification('Error al guardar la transacción: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteTransaction(transactionId) {
+            const transaction = currentTransactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+
+            const result = await window.AhorrandoGano.Utils.confirmAction(
+                `¿Estás seguro de que quieres eliminar "${transaction.description}"? Esta acción no se puede deshacer.`,
+                '¿Eliminar transacción?'
+            );
+
+            if (result) {
+                try {
+                    const deleteResult = window.AhorrandoGano.TransactionManager.deleteTransaction(transactionId);
+                    if (deleteResult.success) {
+                        window.AhorrandoGano.Utils.showNotification('Transacción eliminada correctamente', 'success');
+                        loadTransactions();
+                        loadDashboardStats();
+                    } else {
+                        window.AhorrandoGano.Utils.showNotification('Error: ' + deleteResult.error, 'error');
+                    }
+                } catch (error) {
+                    window.AhorrandoGano.Utils.showNotification('Error al eliminar la transacción: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('dateFromFilter').value = '';
+            document.getElementById('dateToFilter').value = '';
+            document.getElementById('quickDateFilter').value = '';
+            
+            filterTransactions();
+        }
+
+        function exportTransactions() {
+            if (filteredTransactions.length === 0) {
+                window.AhorrandoGano.Utils.showNotification('No hay transacciones para exportar', 'warning');
+                return;
+            }
+
+            const user = window.AhorrandoGano.UserManager.getCurrentUser();
+            const categories = user ? window.AhorrandoGano.CategoryManager.getUserCategories(user.id) : [];
+            const csv = window.AhorrandoGano.Utils.transactionsToCSV(filteredTransactions, categories);
+            const fileName = `transacciones_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            window.AhorrandoGano.Utils.downloadFile(csv, fileName);
+            window.AhorrandoGano.Utils.showNotification(`${filteredTransactions.length} transacciones exportadas`, 'success');
+        }
+
+        function logout() {
+            window.AhorrandoGano.UserManager.logout();
+        }
+    </script>
+
+
+</body>
+</html>

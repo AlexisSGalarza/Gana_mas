@@ -1,0 +1,33 @@
+/*
+ * Font Awesome v6.4.0 - Iconos vectoriales y CSS
+ * Para descargar la versión completa, visita:
+ * https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css
+ * 
+ * Este es un archivo placeholder. Para usar la aplicación:
+ * 1. Descarga all.min.css del enlace de arriba
+ * 2. Reemplaza este archivo con el descargado
+ * 3. O usa el CDN cambiando la referencia en el HTML
+ */
+
+/* Iconos básicos usando Unicode mientras descargas Font Awesome */
+.fas::before, .fa::before { 
+    font-family: Arial, sans-serif; 
+    font-weight: normal;
+}
+
+.fa-piggy-bank::before { content: '🐷'; }
+.fa-chart-pie::before { content: '📊'; }
+.fa-mobile-alt::before { content: '📱'; }
+.fa-shield-alt::before { content: '🛡️'; }
+.fa-tags::before { content: '🏷️'; }
+.fa-chart-bar::before { content: '📈'; }
+.fa-graduation-cap::before { content: '🎓'; }
+.fa-wallet::before { content: '💰'; }
+.fa-chart-line::before { content: '📈'; }
+.fa-shopping-cart::before { content: '🛒'; }
+.fa-user-plus::before { content: '👤'; }
+.fa-play::before { content: '▶️'; }
+.fa-rocket::before { content: '🚀'; }
+.fa-eye::before { content: '👁️'; }
+
+/* ⚠️ IMPORTANTE: Reemplaza este archivo con Font Awesome real para todos los iconos */

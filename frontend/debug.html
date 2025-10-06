@@ -1,0 +1,583 @@
+<!DOCTYPE html><!DOCTYPE html>
+
+<html lang="es"><html lang="es">
+
+<head><head>
+
+    <meta charset="UTF-8">    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Debug - Sistema de Finanzas</title>    <title>Debug - Sistema de Finanzas</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.js"></script>    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.js"></script>
+
+</head></head>
+
+<body class="bg-light"><body class="bg-light">
+
+    <div class="container mt-4">    <div class="container mt-5">
+
+        <div class="row">        <div class="row justify-content-center">
+
+            <div class="col-12">            <div class="col-md-8">
+
+                <div class="card">                <div class="card">
+
+                    <div class="card-header bg-primary text-white">                    <div class="card-header bg-primary text-white">
+
+                        <h4>🔧 Debug - Sistema de Finanzas</h4>                        <h5 class="mb-0">� Debug - Sistema de Finanzas</h5>
+
+                    </div>                    </div>
+
+                    <div class="card-body">                    <div class="card-body">
+
+                        <div class="row mb-3">                        <h6>Estado del Sistema:</h6>
+
+                            <div class="col-md-4 mb-2">                        <div id="debugInfo" class="mb-4"></div>
+
+                                <button class="btn btn-info w-100" onclick="testLogin()">Test Login</button>                        
+
+                            </div>                        <div class="row">
+
+                            <div class="col-md-4 mb-2">                            <div class="col-md-6 mb-3">
+
+                                <button class="btn btn-success w-100" onclick="testCategories()">Test Categorías</button>                                <button class="btn btn-info w-100" onclick="testLogin()">
+
+                            </div>                                    🔐 Test Login
+
+                            <div class="col-md-4 mb-2">                                </button>
+
+                                <button class="btn btn-warning w-100" onclick="testReports()">Test Reportes</button>                            </div>
+
+                            </div>                            <div class="col-md-6 mb-3">
+
+                        </div>                                <button class="btn btn-success w-100" onclick="testCategories()">
+
+                        <div class="row mb-3">                                    📂 Test Categorías
+
+                            <div class="col-12">                                </button>
+
+                                <button class="btn btn-danger w-100" onclick="clearStorage()">Limpiar Datos</button>                            </div>
+
+                            </div>                            <div class="col-md-6 mb-3">
+
+                        </div>                                <button class="btn btn-warning w-100" onclick="testTransactions()">
+
+                        <div id="results" class="bg-light p-3" style="min-height: 300px; font-family: monospace; font-size: 12px;">                                    💸 Test Transacciones
+
+                            Haz clic en un botón para probar el sistema...                                </button>
+
+                        </div>                            </div>
+
+                    </div>                            <div class="col-md-6 mb-3">
+
+                </div>                                <button class="btn btn-danger w-100" onclick="testReports()">
+
+            </div>                                    📊 Test Reportes
+
+        </div>                                </button>
+
+    </div>                            </div>
+
+                            <div class="col-12">
+
+    <script src="js/main.js"></script>                                <button class="btn btn-secondary w-100" onclick="clearStorage()">
+
+    <script>                                    🗑️ Limpiar Datos
+
+        function log(msg) {                                </button>
+
+            const results = document.getElementById('results');                            </div>
+
+            const time = new Date().toLocaleTimeString();                        </div>
+
+            results.innerHTML += `[${time}] ${msg}<br>`;                        
+
+            results.scrollTop = results.scrollHeight;                        <div class="mt-4">
+
+        }                            <h6>Resultado de Pruebas:</h6>
+
+                            <div id="testResults" class="bg-light p-3" style="min-height: 200px; font-family: monospace; font-size: 12px; overflow-y: auto;">
+
+        function clear() {                                Presiona un botón para ejecutar pruebas...
+
+            document.getElementById('results').innerHTML = '';                            </div>
+
+        }                        </div>
+
+                    </div>
+
+        function testLogin() {                </div>
+
+            clear();            </div>
+
+            log('🔐 Probando sistema de login...');        </div>
+
+                </div>
+
+            try {
+
+                if (!window.AhorrandoGano) {    <script src="js/main.js"></script>
+
+                    log('❌ ERROR: Sistema no cargado');    
+
+                    return;    <script>
+
+                }        let testOutput = [];
+
+
+
+                const testUser = {        function log(message, type = 'info') {
+
+                    email: 'test@test.com',            const timestamp = new Date().toLocaleTimeString();
+
+                    password: 'test123',            const color = type === 'error' ? 'text-danger' : 
+
+                    name: 'Usuario Test'                         type === 'success' ? 'text-success' : 
+
+                };                         type === 'warning' ? 'text-warning' : 'text-info';
+
+            
+
+                log('Registrando usuario...');            testOutput.push(`<span class="${color}">[${timestamp}] ${message}</span>`);
+
+                const registerResult = window.AhorrandoGano.UserManager.register(testUser);            document.getElementById('testResults').innerHTML = testOutput.join('<br>');
+
+                            document.getElementById('testResults').scrollTop = document.getElementById('testResults').scrollHeight;
+
+                if (registerResult.success) {        }
+
+                    log('✅ Usuario registrado');
+
+                } else {        function clearLog() {
+
+                    log(`⚠️ ${registerResult.error}`);            testOutput = [];
+
+                }            document.getElementById('testResults').innerHTML = 'Pruebas limpiadas...';
+
+        }
+
+                log('Iniciando sesión...');
+
+                const loginResult = window.AhorrandoGano.UserManager.login({        // Verificar estado del sistema al cargar
+
+                    email: testUser.email,        document.addEventListener('DOMContentLoaded', function() {
+
+                    password: testUser.password            let systemInfo = '';
+
+                });            
+
+            if (window.AhorrandoGano) {
+
+                if (loginResult.success) {                systemInfo += '<span class="text-success">✅ Sistema AhorrandoGano cargado</span><br>';
+
+                    log('✅ Login exitoso');                
+
+                    const user = window.AhorrandoGano.UserManager.getCurrentUser();                if (window.AhorrandoGano.UserManager) {
+
+                    log(`Usuario activo: ${user.email}`);                    systemInfo += '<span class="text-success">✅ UserManager disponible</span><br>';
+
+                } else {                } else {
+
+                    log(`❌ Error en login: ${loginResult.error}`);                    systemInfo += '<span class="text-danger">❌ UserManager no disponible</span><br>';
+
+                }                }
+
+            } catch (error) {                
+
+                log(`❌ Error: ${error.message}`);                if (window.AhorrandoGano.CategoryManager) {
+
+            }                    systemInfo += '<span class="text-success">✅ CategoryManager disponible</span><br>';
+
+        }                } else {
+
+                    systemInfo += '<span class="text-danger">❌ CategoryManager no disponible</span><br>';
+
+        function testCategories() {                }
+
+            clear();                
+
+            log('📂 Probando categorías...');                if (window.AhorrandoGano.TransactionManager) {
+
+                    systemInfo += '<span class="text-success">✅ TransactionManager disponible</span><br>';
+
+            try {                } else {
+
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();                    systemInfo += '<span class="text-danger">❌ TransactionManager no disponible</span><br>';
+
+                if (!user) {                }
+
+                    log('❌ No hay usuario logueado');            } else {
+
+                    return;                systemInfo += '<span class="text-danger">❌ Sistema AhorrandoGano NO cargado</span><br>';
+
+                }            }
+
+            
+
+                log(`Usuario: ${user.email}`);            document.getElementById('debugInfo').innerHTML = systemInfo;
+
+                        });
+
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+
+                log(`Categorías encontradas: ${categories.length}`);        function testLogin() {
+
+            clearLog();
+
+                if (categories.length === 0) {            log('🔐 Probando sistema de login...');
+
+                    log('Creando categorías por defecto...');            
+
+                    window.AhorrandoGano.CategoryManager.initDefaultCategories(user.id);            try {
+
+                    const newCategories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);                // Crear usuario de prueba
+
+                    log(`Categorías creadas: ${newCategories.length}`);                const testUser = {
+
+                }                    email: 'test@example.com',
+
+                    password: 'test123',
+
+                // Probar crear categoría                    name: 'Usuario Test'
+
+                const testCat = {                };
+
+                    name: 'Test ' + Date.now(),                
+
+                    type: 'expense',                log('Registrando usuario de prueba...');
+
+                    color: '#ff0000',                const registerResult = window.AhorrandoGano.UserManager.register(testUser);
+
+                    icon: '🧪'                
+
+                };                if (registerResult.success) {
+
+                    log('✅ Usuario registrado correctamente', 'success');
+
+                log('Creando categoría de prueba...');                    
+
+                const result = window.AhorrandoGano.CategoryManager.createCategory(testCat);                    log('Iniciando sesión...');
+
+                                    const loginResult = window.AhorrandoGano.UserManager.login({
+
+                if (result.success) {                        email: testUser.email,
+
+                    log('✅ Categoría creada correctamente');                        password: testUser.password
+
+                                        });
+
+                    // Probar actualizar                    
+
+                    const updateResult = window.AhorrandoGano.CategoryManager.updateCategory(                    if (loginResult.success) {
+
+                        result.category.id,                         log('✅ Login exitoso', 'success');
+
+                        {...testCat, name: 'Updated Test'}                        
+
+                    );                        const currentUser = window.AhorrandoGano.UserManager.getCurrentUser();
+
+                                            if (currentUser) {
+
+                    if (updateResult.success) {                            log(`✅ Usuario activo: ${currentUser.email}`, 'success');
+
+                        log('✅ Categoría actualizada');                        } else {
+
+                    } else {                            log('❌ No se pudo obtener usuario actual', 'error');
+
+                        log(`❌ Error actualizando: ${updateResult.error}`);                        }
+
+                    }                    } else {
+
+                        log(`❌ Error en login: ${loginResult.error}`, 'error');
+
+                    // Probar eliminar                    }
+
+                    const deleteResult = window.AhorrandoGano.CategoryManager.deleteCategory(result.category.id);                } else {
+
+                    if (deleteResult.success) {                    log(`ℹ️ ${registerResult.error}`, 'warning');
+
+                        log('✅ Categoría eliminada');                    
+
+                    } else {                    // Intentar login con usuario existente
+
+                        log(`❌ Error eliminando: ${deleteResult.error}`);                    const loginResult = window.AhorrandoGano.UserManager.login({
+
+                    }                        email: testUser.email,
+
+                } else {                        password: testUser.password
+
+                    log(`❌ Error creando: ${result.error}`);                    });
+
+                }                    
+
+                    if (loginResult.success) {
+
+            } catch (error) {                        log('✅ Login con usuario existente exitoso', 'success');
+
+                log(`❌ Error: ${error.message}`);                    } else {
+
+            }                        log(`❌ Error en login: ${loginResult.error}`, 'error');
+
+        }                    }
+
+                }
+
+        function testReports() {            } catch (error) {
+
+            clear();                log(`❌ Error en test de login: ${error.message}`, 'error');
+
+            log('📊 Probando reportes...');            }
+
+        }
+
+            try {
+
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();        function testCategories() {
+
+                if (!user) {            clearLog();
+
+                    log('❌ No hay usuario logueado');            log('📂 Probando sistema de categorías...');
+
+                    return;            
+
+                }            try {
+
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();
+
+                log(`Usuario: ${user.email}`);                if (!user) {
+
+                    log('❌ No hay usuario logueado. Ejecuta test de login primero.', 'error');
+
+                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(user.id);                    return;
+
+                log(`Transacciones: ${transactions.length}`);                }
+
+                
+
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);                log(`Usuario activo: ${user.email}`);
+
+                log(`Categorías: ${categories.length}`);                
+
+                // Obtener categorías del usuario
+
+                if (transactions.length > 0) {                log('Obteniendo categorías del usuario...');
+
+                    const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+
+                    const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);                log(`✅ Se encontraron ${categories.length} categorías`, 'success');
+
+                                    
+
+                    log(`💰 Ingresos: $${income}`);                categories.forEach(cat => {
+
+                    log(`💸 Gastos: $${expenses}`);                    log(`  - ${cat.name} (${cat.type}) ${cat.icon}`);
+
+                    log(`📊 Balance: $${income - expenses}`);                });
+
+                } else {                
+
+                    log('No hay transacciones');                // Probar crear nueva categoría
+
+                }                log('Creando nueva categoría de prueba...');
+
+                const newCategory = {
+
+                log('✅ Test de reportes completado');                    name: 'Test Category ' + Date.now(),
+
+                    type: 'expense',
+
+            } catch (error) {                    color: '#ff0000',
+
+                log(`❌ Error: ${error.message}`);                    icon: '🧪'
+
+            }                };
+
+        }                
+
+                const createResult = window.AhorrandoGano.CategoryManager.createCategory(newCategory);
+
+        function clearStorage() {                if (createResult.success) {
+
+            if (confirm('¿Limpiar todos los datos?')) {                    log('✅ Categoría creada correctamente', 'success');
+
+                localStorage.clear();                    
+
+                clear();                    // Probar actualizar categoría
+
+                log('🗑️ Datos limpiados');                    const updateResult = window.AhorrandoGano.CategoryManager.updateCategory(
+
+                setTimeout(() => location.reload(), 1000);                        createResult.category.id, 
+
+            }                        { ...newCategory, name: 'Updated Test Category' }
+
+        }                    );
+
+                    
+
+        // Verificar sistema al cargar                    if (updateResult.success) {
+
+        window.addEventListener('load', function() {                        log('✅ Categoría actualizada correctamente', 'success');
+
+            setTimeout(() => {                    } else {
+
+                if (window.AhorrandoGano) {                        log(`❌ Error actualizando: ${updateResult.error}`, 'error');
+
+                    log('✅ Sistema cargado correctamente');                    }
+
+                } else {                    
+
+                    log('❌ Sistema no pudo cargar');                    // Probar eliminar categoría
+
+                }                    const deleteResult = window.AhorrandoGano.CategoryManager.deleteCategory(createResult.category.id);
+
+            }, 100);                    if (deleteResult.success) {
+
+        });                        log('✅ Categoría eliminada correctamente', 'success');
+
+    </script>                    } else {
+
+</body>                        log(`❌ Error eliminando: ${deleteResult.error}`, 'error');
+
+</html>                    }
+                } else {
+                    log(`❌ Error creando categoría: ${createResult.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error en test de categorías: ${error.message}`, 'error');
+            }
+        }
+
+        function testTransactions() {
+            clearLog();
+            log('💸 Probando sistema de transacciones...');
+            
+            try {
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();
+                if (!user) {
+                    log('❌ No hay usuario logueado. Ejecuta test de login primero.', 'error');
+                    return;
+                }
+                
+                // Obtener categorías
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+                if (categories.length === 0) {
+                    log('❌ No hay categorías. Ejecuta test de categorías primero.', 'error');
+                    return;
+                }
+                
+                log(`Usuario: ${user.email}, Categorías disponibles: ${categories.length}`);
+                
+                // Crear transacción de prueba
+                const testTransaction = {
+                    amount: 100,
+                    description: 'Transacción de prueba ' + Date.now(),
+                    categoryId: categories[0].id,
+                    type: categories[0].type,
+                    date: new Date().toISOString()
+                };
+                
+                log('Creando transacción de prueba...');
+                const result = window.AhorrandoGano.TransactionManager.addTransaction(testTransaction);
+                
+                if (result.success) {
+                    log('✅ Transacción creada correctamente', 'success');
+                    
+                    // Obtener transacciones del usuario
+                    const userTransactions = window.AhorrandoGano.TransactionManager.getUserTransactions(user.id);
+                    log(`✅ Total de transacciones: ${userTransactions.length}`, 'success');
+                } else {
+                    log(`❌ Error creando transacción: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error en test de transacciones: ${error.message}`, 'error');
+            }
+        }
+
+        function testReports() {
+            clearLog();
+            log('� Probando sistema de reportes...');
+            
+            try {
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();
+                if (!user) {
+                    log('❌ No hay usuario logueado. Ejecuta test de login primero.', 'error');
+                    return;
+                }
+                
+                log(`Usuario: ${user.email}`);
+                
+                // Obtener transacciones
+                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(user.id);
+                log(`📈 Transacciones encontradas: ${transactions.length}`);
+                
+                if (transactions.length > 0) {
+                    const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+                    const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                    const balance = income - expenses;
+                    
+                    log(`💰 Ingresos totales: $${income.toFixed(2)}`, 'success');
+                    log(`💸 Gastos totales: $${expenses.toFixed(2)}`, 'warning');
+                    log(`📊 Balance: $${balance.toFixed(2)}`, balance >= 0 ? 'success' : 'error');
+                } else {
+                    log('ℹ️ No hay transacciones para calcular reportes', 'warning');
+                }
+                
+                // Probar categorías
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+                log(`📂 Categorías disponibles: ${categories.length}`, 'info');
+                
+                log('✅ Test de reportes completado', 'success');
+                
+            } catch (error) {
+                log(`❌ Error en test de reportes: ${error.message}`, 'error');
+            }
+        }
+
+        function clearStorage() {
+            if (confirm('¿Estás seguro de que quieres limpiar todos los datos?')) {
+                localStorage.clear();
+                log('🗑️ Datos limpiados. Recarga la página.', 'warning');
+                setTimeout(() => location.reload(), 2000);
+            }
+        }
+            }
+            
+            output.innerHTML = html;
+        }
+        
+        function createTestUser() {
+            try {
+                const testUser = {
+                    name: 'Usuario Prueba',
+                    email: 'test@test.com',
+                    password: '123456'
+                };
+                
+                const result = window.AhorrandoGano.UserManager.register(testUser);
+                if (result.success) {
+                    // Iniciar sesión automáticamente
+                    window.AhorrandoGano.UserManager.login(testUser.email, testUser.password);
+                    
+                    document.getElementById('debugOutput').innerHTML += 
+                        '<div class="alert alert-success">✅ Usuario de prueba creado y logueado exitosamente</div>';
+                    
+                    // Ejecutar debug nuevamente
+                    setTimeout(runDebug, 500);
+                } else {
+                    document.getElementById('debugOutput').innerHTML += 
+                        `<div class="alert alert-danger">❌ Error al crear usuario: ${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('debugOutput').innerHTML += 
+                    `<div class="alert alert-danger">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

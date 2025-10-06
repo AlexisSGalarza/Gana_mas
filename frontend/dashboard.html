@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Finanzas</title>
+    
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous">
+    
+    <!-- SweetAlert2 CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css">
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            position: fixed;
+            width: 250px;
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 15px 20px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 20px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 0;
+        }
+        
+        .profile-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout-section {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Sidebar -->
+    <nav class="sidebar d-flex flex-column position-fixed" style="width: 250px; height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); z-index: 1000;">
+        <div class="p-4 text-center text-white border-bottom border-secondary">
+            <div class="mb-2">
+                <i class="fas fa-piggy-bank fa-2x text-warning"></i>
+            </div>
+            <h6 class="mb-0 fw-bold">Ahorrando Gano</h6>
+        </div>
+        
+        <ul class="nav nav-pills flex-column flex-grow-1 p-3">
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white active" href="dashboard.html" style="border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-chart-line me-3"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="transacciones.html" style="border-radius: 8px;">
+                    <i class="fas fa-exchange-alt me-3"></i>Transacciones
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="categorias.html" style="border-radius: 8px;">
+                    <i class="fas fa-tags me-3"></i>Categorías
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="reportes.html" style="border-radius: 8px;">
+                    <i class="fas fa-chart-bar me-3"></i>Reportes
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link text-white-50" href="perfil.html" style="border-radius: 8px;">
+                    <i class="fas fa-user me-3"></i>Perfil
+                </a>
+            </li>
+        </ul>
+        
+        <!-- User info at bottom -->
+        <div class="logout-section text-center">
+            <div class="text-white-50 small mb-2">
+                <div id="userEmail">usuario@ejemplo.com</div>
+            </div>
+            <button class="btn btn-outline-light btn-sm w-100" onclick="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" style="margin-left: 250px; min-height: 100vh;">
+        <!-- Header -->
+        <div class="bg-white shadow-sm p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">📊 Dashboard</h2>
+                    <p class="text-muted mb-0">Resumen general de tus finanzas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="container-fluid px-4">
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-plus fa-lg text-success"></i>
+                            </div>
+                            <h6 class="card-title">Agregar Ingreso</h6>
+                            <a href="transacciones.html" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-arrow-up me-1"></i>Nuevo Ingreso
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-minus fa-lg text-danger"></i>
+                            </div>
+                            <h6 class="card-title">Agregar Gasto</h6>
+                            <a href="transacciones.html" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-arrow-down me-1"></i>Nuevo Gasto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="rounded-circle bg-info bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-tags fa-lg text-info"></i>
+                            </div>
+                            <h6 class="card-title">Categorías</h6>
+                            <a href="categorias.html" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-cog me-1"></i>Gestionar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-chart-bar fa-lg text-warning"></i>
+                            </div>
+                            <h6 class="card-title">Reportes</h6>
+                            <a href="reportes.html" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-chart-line me-1"></i>Ver Análisis
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 pb-0">
+                            <h5 class="card-title mb-0">Resumen Financiero</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4 mb-3">
+                                    <div class="border-end border-light">
+                                        <h3 class="text-success mb-1" id="totalIncome">$0</h3>
+                                        <small class="text-muted">Total Ingresos</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="border-end border-light">
+                                        <h3 class="text-danger mb-1" id="totalExpenses">$0</h3>
+                                        <small class="text-muted">Total Gastos</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <h3 class="text-primary mb-1" id="totalBalance">$0</h3>
+                                    <small class="text-muted">Balance</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white border-0 pb-0">
+                            <h5 class="card-title mb-0">Este Mes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-calendar-alt fa-2x text-primary opacity-75"></i>
+                                </div>
+                                <h4 class="text-primary mb-1" id="monthlyTransactions">0</h4>
+                                <small class="text-muted">Transacciones</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Transacciones Recientes</h5>
+                            <a href="transacciones.html" class="btn btn-sm btn-outline-primary">
+                                Ver todas <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div id="recentTransactions">
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                                    <p>No hay transacciones recientes</p>
+                                    <a href="transacciones.html" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Agregar Primera Transacción
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Offcanvas -->
+    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="sidebarOffcanvas">
+        <div class="offcanvas-header bg-primary text-white">
+            <h5 class="offcanvas-title">
+                <i class="fas fa-piggy-bank me-2"></i>Finanzas
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="dashboard.html">
+                        <i class="fas fa-chart-line me-3"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="transacciones.html">
+                        <i class="fas fa-exchange-alt me-3"></i>Transacciones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="categorias.html">
+                        <i class="fas fa-tags me-3"></i>Categorías
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="reportes.html">
+                        <i class="fas fa-chart-bar me-3"></i>Reportes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="perfil.html">
+                        <i class="fas fa-user me-3"></i>Perfil
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.js"></script>
+    
+    <!-- Main App -->
+    <script src="js/main.js"></script>
+    
+    <script>
+        // Load user data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            loadDashboardStats();
+        });
+        
+        function loadUserData() {
+            const user = window.AhorrandoGano.UserManager.getCurrentUser();
+            if (user) {
+                document.getElementById('userEmail').textContent = user.email;
+            }
+        }
+        
+        function loadDashboardStats() {
+            try {
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();
+                if (!user) return;
+                
+                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(user.id);
+                
+                // Calculate totals
+                let totalIncome = 0;
+                let totalExpenses = 0;
+                let monthlyCount = 0;
+                
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                
+                transactions.forEach(transaction => {
+                    const transactionDate = new Date(transaction.date);
+                    
+                    if (transaction.type === 'income') {
+                        totalIncome += transaction.amount;
+                    } else {
+                        totalExpenses += Math.abs(transaction.amount);
+                    }
+                    
+                    // Count monthly transactions
+                    if (transactionDate.getMonth() === currentMonth && 
+                        transactionDate.getFullYear() === currentYear) {
+                        monthlyCount++;
+                    }
+                });
+                
+                const balance = totalIncome - totalExpenses;
+                
+                // Update UI
+                document.getElementById('totalIncome').textContent = 
+                    window.AhorrandoGano.Utils.formatCurrency(totalIncome);
+                document.getElementById('totalExpenses').textContent = 
+                    window.AhorrandoGano.Utils.formatCurrency(totalExpenses);
+                document.getElementById('totalBalance').textContent = 
+                    window.AhorrandoGano.Utils.formatCurrency(balance);
+                document.getElementById('monthlyTransactions').textContent = monthlyCount;
+                
+                // Load recent transactions
+                loadRecentTransactions(transactions);
+                
+            } catch (error) {
+                console.log('Error loading dashboard stats:', error);
+            }
+        }
+        
+        function loadRecentTransactions(transactions) {
+            const recentTransactions = transactions.slice(-5).reverse(); // Last 5
+            const container = document.getElementById('recentTransactions');
+            
+            if (recentTransactions.length === 0) {
+                return; // Keep default message
+            }
+            
+            container.innerHTML = recentTransactions.map(transaction => {
+                const typeClass = transaction.type === 'income' ? 'text-success' : 'text-danger';
+                const typeSymbol = transaction.type === 'income' ? '+' : '-';
+                const typeIcon = transaction.type === 'income' ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                return `
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas ${typeIcon} ${typeClass}"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">${transaction.description}</h6>
+                                <small class="text-muted">${window.AhorrandoGano.Utils.formatDate(transaction.date)}</small>
+                            </div>
+                        </div>
+                        <div class="fw-bold ${typeClass}">
+                            ${typeSymbol}${window.AhorrandoGano.Utils.formatCurrency(Math.abs(transaction.amount))}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function logout() {
+            window.AhorrandoGano.Utils.showNotification('Cerrando sesión...', 'info');
+            setTimeout(() => {
+                window.AhorrandoGano.UserManager.logout();
+                window.location.href = '../index.html';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+/*
+ * SweetAlert2 v11.0 - Hermosas alertas y modales
+ * Para descargar la versión completa, visita:
+ * https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css
+ * 
+ * Este es un archivo placeholder. Para usar la aplicación:
+ * 1. Descarga sweetalert2.min.css del enlace de arriba
+ * 2. Reemplaza este archivo con el descargado
+ * 3. O usa el CDN cambiando la referencia en el HTML
+ */
+
+/* Estilos básicos de emergencia para alertas nativas */
+.swal2-popup { 
+    background: white; 
+    border-radius: 8px; 
+    padding: 20px; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+}
+
+/* ⚠️ IMPORTANTE: Reemplaza este archivo con SweetAlert2 real para alertas elegantes */
