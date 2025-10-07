@@ -14,7 +14,24 @@
     <!-- SweetAlert2 CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css">
     
-    <!-- Estilos personalizados -->
+    <!-- Estilos                 // Crear CSV manualmente
+                const headers = ['Fecha', 'Descripción', 'Categoría', 'Tipo', 'Monto'];
+                let csvContent = '\uFEFF' + headers.join(',') + '\r\n';
+
+                transactions.forEach(transaction => {
+                    const category = categories.find(c => c.id === transaction.categoryId);
+                    const categoryName = category ? category.name : 'Sin categoría';
+                    const typeText = transaction.type === 'income' ? 'Ingreso' : 'Gasto';
+                    
+                    const row = [
+                        transaction.date,
+                        `"${(transaction.description || 'Sin descripción').replace(/"/g, '""')}"`,
+                        `"${categoryName.replace(/"/g, '""')}"`,
+                        typeText,
+                        transaction.amount
+                    ];
+                    csvContent += row.join(',') + '\r\n';
+                });
     <link rel="stylesheet" href="css/style.css">
     
     <style>
@@ -163,33 +180,21 @@
                     <h2 class="mb-1">📊 Reportes</h2>
                     <p class="text-muted mb-0">Análisis y estadísticas de tus finanzas</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Content -->
-        <div class="container-fluid px-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <h2 class="fw-bold" style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                    <i class="fas fa-chart-bar me-2"></i>
-                    Reportes Financieros
-                </h2>
-                <p class="text-muted mb-0">Analiza tus hábitos financieros con reportes detallados</p>
-            </div>
-            <div class="col-md-4 text-md-end">
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="generateReport()">
                         <i class="fas fa-chart-line me-2"></i>
                         Generar Reporte
                     </button>
-                    <button class="btn btn-success" onclick="exportReport()">
+                    <button class="btn btn-success" onclick="exportToCSV()">
                         <i class="fas fa-download me-2"></i>
-                        Exportar
+                        Exportar CSV
                     </button>
                 </div>
             </div>
         </div>
+
+        <!-- Content -->
+        <div class="container-fluid px-4">
 
         <!-- Filtros de período -->
         <div class="card mb-4">
@@ -871,6 +876,72 @@
                 document.getElementById('sidebar').classList.remove('show');
             }
         });
+
+        // Función para exportar a CSV (usa los datos del reporte actual)
+        function exportToCSV() {
+            try {
+                if (!window.AhorrandoGano || !window.AhorrandoGano.UserManager) {
+                    alert('Sistema no disponible');
+                    return;
+                }
+
+                const user = window.AhorrandoGano.UserManager.getCurrentUser();
+                if (!user) {
+                    alert('Usuario no autenticado');
+                    return;
+                }
+
+                // Usar las transacciones actuales filtradas por el reporte
+                const transactions = currentTransactions || window.AhorrandoGano.TransactionManager.getUserTransactions(user.id);
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
+
+                if (transactions.length === 0) {
+                    window.AhorrandoGano.Utils.showNotification('No hay transacciones para exportar en el periodo seleccionado', 'warning');
+                    return;
+                }
+
+                // Crear CSV manualmente
+                const headers = ['Fecha', 'Descripción', 'Categoría', 'Tipo', 'Monto'];
+                let csvContent = headers.join(',') + '\\n';
+
+                transactions.forEach(transaction => {
+                    const category = categories.find(c => c.id === transaction.categoryId);
+                    const categoryName = category ? category.name : 'Sin categoría';
+                    const typeText = transaction.type === 'income' ? 'Ingreso' : 'Gasto';
+                    
+                    const row = [
+                        transaction.date,
+                        `"${(transaction.description || 'Sin descripción').replace(/"/g, '""')}"`,
+                        `"${categoryName.replace(/"/g, '""')}"`,
+                        typeText,
+                        transaction.amount
+                    ];
+                    csvContent += row.join(',') + '\\n';
+                });
+
+                // Descargar archivo
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', `reporte_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                window.AhorrandoGano.Utils.showNotification(`${transactions.length} transacciones del reporte exportadas`, 'success');
+
+            } catch (error) {
+                if (window.AhorrandoGano && window.AhorrandoGano.Utils) {
+                    window.AhorrandoGano.Utils.showNotification('Error exportando CSV: ' + error.message, 'error');
+                } else {
+                    alert('Error exportando CSV: ' + error.message);
+                }
+            }
+        }
     </script>
 
     <style>

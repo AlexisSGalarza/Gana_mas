@@ -168,16 +168,6 @@
 
         <!-- Content -->
         <div class="container-fluid px-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <h2 class="fw-bold" style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                    <i class="fas fa-user-circle me-2"></i>
-                    Mi Perfil
-                </h2>
-                <p class="text-muted mb-0">Gestiona tu información personal y configuración de cuenta</p>
-            </div>
-        </div>
 
         <div class="row">
             <!-- Información del perfil -->
@@ -771,19 +761,51 @@
         }
 
         function exportAllData() {
-            const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
-            const categories = window.AhorrandoGano.TransactionManager.getCategories();
-            
-            if (transactions.length === 0) {
-                window.AhorrandoGano.Utils.showNotification('No tienes transacciones para exportar', 'warning');
-                return;
-            }
+            try {
+                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(currentUser.id);
+                
+                if (transactions.length === 0) {
+                    window.AhorrandoGano.Utils.showNotification('No tienes transacciones para exportar', 'warning');
+                    return;
+                }
 
-            const csv = window.AhorrandoGano.Utils.transactionsToCSV(transactions, categories);
-            const fileName = `mi_historial_financiero_${new Date().toISOString().split('T')[0]}.csv`;
-            
-            window.AhorrandoGano.Utils.downloadFile(csv, fileName);
-            window.AhorrandoGano.Utils.showNotification(`${transactions.length} transacciones exportadas correctamente`, 'success');
+                // Crear CSV manualmente con formato correcto para Excel
+                const headers = ['Fecha', 'Descripción', 'Categoría', 'Tipo', 'Monto'];
+                let csvContent = '\uFEFF' + headers.join(',') + '\r\n';
+
+                transactions.forEach(transaction => {
+                    const category = categories.find(c => c.id === transaction.categoryId);
+                    const categoryName = category ? category.name : 'Sin categoría';
+                    const typeText = transaction.type === 'income' ? 'Ingreso' : 'Gasto';
+                    
+                    const row = [
+                        transaction.date,
+                        `"${(transaction.description || 'Sin descripción').replace(/"/g, '""')}"`,
+                        `"${categoryName.replace(/"/g, '""')}"`,
+                        typeText,
+                        transaction.amount
+                    ];
+                    csvContent += row.join(',') + '\r\n';
+                });
+
+                // Descargar archivo
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', `mi_historial_financiero_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                window.AhorrandoGano.Utils.showNotification(`${transactions.length} transacciones exportadas correctamente`, 'success');
+            } catch (error) {
+                window.AhorrandoGano.Utils.showNotification('Error exportando datos: ' + error.message, 'error');
+            }
         }
 
         async function showDataManagementModal() {
