@@ -628,7 +628,7 @@
 
             filteredTransactions = currentTransactions.filter(transaction => {
                 // Filtro de búsqueda
-                if (search && !transaction.description.toLowerCase().includes(search)) {
+                if (search && !(transaction.description || '').toLowerCase().includes(search)) {
                     return false;
                 }
                 
