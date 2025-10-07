@@ -35,13 +35,15 @@ const Utils = {
     formatCurrency: (amount) => {
         return new Intl.NumberFormat('es-MX', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'MXN'
         }).format(amount);
     },
     
     // Formatear fecha
     formatDate: (date) => {
-        return new Date(date).toLocaleDateString('es-MX', {
+        // Crear fecha local para evitar problemas de zona horaria
+        const localDate = new Date(date + 'T00:00:00');
+        return localDate.toLocaleDateString('es-MX', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -166,7 +168,6 @@ const Storage = {
             localStorage.setItem(key, JSON.stringify(data));
             return true;
         } catch (error) {
-            console.error('Error saving to localStorage:', error);
             return false;
         }
     },
@@ -177,7 +178,6 @@ const Storage = {
             const data = localStorage.getItem(key);
             return data ? JSON.parse(data) : defaultValue;
         } catch (error) {
-            console.error('Error loading from localStorage:', error);
             return defaultValue;
         }
     },
@@ -188,7 +188,6 @@ const Storage = {
             localStorage.removeItem(key);
             return true;
         } catch (error) {
-            console.error('Error removing from localStorage:', error);
             return false;
         }
     }
@@ -242,17 +241,15 @@ const UserManager = {
             const user = users.find(u => u.email === email && u.password === hashedPassword);
             
             if (!user) {
-                throw new Error('Email o contraseña incorrectos');
+                return { success: false, error: 'Email o contraseña incorrectos' };
             }
             
             // Guardar sesión
             Storage.save(APP_CONFIG.storage.currentUser, user);
-            Utils.showNotification(`¡Bienvenido, ${user.firstName}!`, 'success');
             
             return { success: true, user };
             
         } catch (error) {
-            Utils.showNotification(error.message, 'error');
             return { success: false, error: error.message };
         }
     },
@@ -529,11 +526,6 @@ const TransactionManager = {
             return { success: false, error: 'Monto inválido' };
         }
 
-        if (!transactionData.description || transactionData.description.trim().length === 0) {
-            Utils.showNotification('La descripción es obligatoria', 'warning');
-            return { success: false, error: 'Descripción requerida' };
-        }
-
         if (!transactionData.categoryId) {
             Utils.showNotification('Debes seleccionar una categoría', 'warning');
             return { success: false, error: 'Categoría requerida' };
@@ -545,7 +537,7 @@ const TransactionManager = {
             id: Utils.generateId(),
             userId: user.id,
             amount: amount,
-            description: transactionData.description.trim(),
+            description: transactionData.description ? transactionData.description.trim() : '',
             categoryId: transactionData.categoryId,
             type: transactionData.type, // 'income' o 'expense'
             date: transactionData.date || new Date().toISOString(),
@@ -632,7 +624,6 @@ const TransactionManager = {
     deleteTransaction: (transactionId) => {
         const user = UserManager.getCurrentUser();
         if (!user) {
-            Utils.showNotification('Debes iniciar sesión para eliminar transacciones', 'error');
             return { success: false, error: 'No hay sesión activa' };
         }
 
@@ -642,35 +633,19 @@ const TransactionManager = {
         );
         
         if (transactionIndex === -1) {
-            Utils.showNotification('Transacción no encontrada', 'error');
             return { success: false, error: 'Transacción no encontrada' };
         }
 
-        // Eliminar la transacción
-        const deletedTransaction = transactions[transactionIndex];
-        transactions.splice(transactionIndex, 1);
-        Storage.save(APP_CONFIG.storage.transactions, transactions);
-        
-        Utils.showNotification('Transacción eliminada correctamente', 'success');
-        
-        return { success: true, transaction: deletedTransaction };
-    },
-
-    // Eliminar transacción
-    deleteTransaction: (transactionId) => {
-        const transactions = Storage.load(APP_CONFIG.storage.transactions, []);
-        const index = transactions.findIndex(t => t.id === transactionId);
-        
-        if (index === -1) {
-            Utils.showNotification('Transacción no encontrada', 'error');
-            return { success: false, error: 'Transacción no encontrada' };
+        try {
+            // Eliminar la transacción
+            const deletedTransaction = transactions[transactionIndex];
+            transactions.splice(transactionIndex, 1);
+            Storage.save(APP_CONFIG.storage.transactions, transactions);
+            
+            return { success: true, transaction: deletedTransaction };
+        } catch (error) {
+            return { success: false, error: 'Error al eliminar la transacción' };
         }
-
-        const deletedTransaction = transactions.splice(index, 1)[0];
-        Storage.save(APP_CONFIG.storage.transactions, transactions);
-        
-        Utils.showNotification('Transacción eliminada correctamente', 'success');
-        return { success: true, transaction: deletedTransaction };
     },
 
     // Obtener categorías
@@ -784,7 +759,6 @@ const TransactionManager = {
 
 // === INICIALIZACIÓN ===
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(`🚀 ${APP_CONFIG.name} v${APP_CONFIG.version} iniciado`);
     
     // Verificar si estamos en una página que requiere autenticación
     const protectedPages = ['dashboard.html', 'transacciones.html', 'categorias.html', 'reportes.html', 'perfil.html'];
@@ -832,7 +806,7 @@ function initCurrentPage() {
             initProfilePage();
             break;
         default:
-            console.log('Página no requiere inicialización específica');
+            // Página no requiere inicialización específica
     }
 }
 
@@ -848,9 +822,12 @@ function initLoginPage() {
             );
             
             if (result.success) {
+                Utils.showNotification(`¡Bienvenido, ${result.user.firstName}!`, 'success');
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 1500);
+            } else {
+                Utils.showNotification(result.error, 'error');
             }
         });
     }
@@ -881,10 +858,13 @@ function initRegisterPage() {
             
             if (result.success) {
                 // Auto-login después del registro
-                await UserManager.login(formData.get('email'), password);
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1500);
+                const loginResult = await UserManager.login(formData.get('email'), password);
+                if (loginResult.success) {
+                    Utils.showNotification(`¡Bienvenido, ${loginResult.user.firstName}!`, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                }
             }
         });
     }
@@ -994,12 +974,10 @@ function loadTransactions() {
 
 function initCategoriesPage() {
     // Implementar gestión de categorías
-    console.log('Categorías page initialized');
 }
 
 function initProfilePage() {
     // Implementar perfil de usuario
-    console.log('Profile page initialized');
 }
 
 // === EXPORTAR PARA USO GLOBAL ===
@@ -1032,25 +1010,4 @@ window.editTransaction = async function(transactionId) {
     Utils.showNotification('Función de edición en desarrollo', 'info');
 };
 
-window.deleteTransaction = async function(transactionId) {
-    const result = await Utils.confirmAction(
-        '¿Estás seguro de que quieres eliminar esta transacción? Esta acción no se puede deshacer.',
-        'Eliminar Transacción'
-    );
-    
-    if (result) {
-        const deleteResult = TransactionManager.deleteTransaction(transactionId);
-        
-        if (deleteResult.success) {
-            // Recargar la lista de transacciones
-            if (typeof loadTransactions === 'function') {
-                loadTransactions();
-            }
-            
-            // También recargar estadísticas si existe la función
-            if (typeof loadDashboardStats === 'function') {
-                loadDashboardStats();
-            }
-        }
-    }
-};
+// La función deleteTransaction se maneja localmente en cada página

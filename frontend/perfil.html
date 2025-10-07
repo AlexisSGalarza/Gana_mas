@@ -480,13 +480,36 @@
                 if (firstNameEl) firstNameEl.value = currentUser.name || currentUser.firstName || '';
                 if (lastNameEl) lastNameEl.value = currentUser.lastName || '';
                 if (emailEl) emailEl.value = currentUser.email || '';
-                if (createdAtEl) createdAtEl.value = window.AhorrandoGano.Utils.formatDate(currentUser.createdAt);
+                
+                // Formatear fecha de creación correctamente
+                if (createdAtEl && currentUser.createdAt) {
+                    const createdDate = new Date(currentUser.createdAt);
+                    const options = { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        timeZone: 'America/Mexico_City'
+                    };
+                    createdAtEl.value = createdDate.toLocaleDateString('es-MX', options);
+                }
+
+                // Actualizar elementos del perfil en la parte superior
+                const profileFullNameEl = document.getElementById('profileFullName');
+                const profileEmailEl = document.getElementById('profileEmail');
+                
+                if (profileFullNameEl) {
+                    const fullName = `${currentUser.name || currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim();
+                    profileFullNameEl.textContent = fullName || 'Usuario';
+                }
+                if (profileEmailEl) {
+                    profileEmailEl.textContent = currentUser.email || 'email@ejemplo.com';
+                }
 
                 // Calcular y mostrar estadísticas
                 updateStatistics();
-                loadRecentTransactions();
+                loadRecentActivity();
             } catch (error) {
-                console.error('Error inicializando perfil:', error);
+                // Error inicializando perfil
                 window.AhorrandoGano.Utils.showNotification('Error cargando perfil', 'error');
             }
         }
@@ -509,6 +532,16 @@
                 if (totalTransactionsEl) totalTransactionsEl.textContent = transactions.length;
                 if (totalCategoriesEl) totalCategoriesEl.textContent = categories.length;
                 if (currentBalanceEl) currentBalanceEl.textContent = window.AhorrandoGano.Utils.formatCurrency(balance);
+
+                // Calcular días activo desde la fecha de registro
+                const accountAgeEl = document.getElementById('accountAge');
+                if (accountAgeEl && currentUser.createdAt) {
+                    const createdDate = new Date(currentUser.createdAt);
+                    const today = new Date();
+                    const diffTime = Math.abs(today - createdDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    accountAgeEl.textContent = diffDays;
+                }
 
                 // Calcular ingresos y gastos del mes actual
                 const now = new Date();
@@ -534,128 +567,47 @@
                 
                 if (monthlyIncomeEl) monthlyIncomeEl.textContent = window.AhorrandoGano.Utils.formatCurrency(monthlyIncome);
                 if (monthlyExpensesEl) monthlyExpensesEl.textContent = window.AhorrandoGano.Utils.formatCurrency(monthlyExpenses);
-            } catch (error) {
-                console.error('Error actualizando estadísticas:', error);
-            }
-        }
 
-        function loadRecentTransactions() {
-            try {
-                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
-                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(currentUser.id);
-                
-                const recentTransactions = transactions
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 5);
-
-                const container = document.getElementById('recentActivity');
-                if (!container) {
-                    console.warn('Elemento recentActivity no encontrado');
-                    return;
-                }
-
-                if (recentTransactions.length === 0) {
-                    container.innerHTML = '<p class="text-muted">No hay transacciones recientes</p>';
-                    return;
-                }
-
-                let html = '';
-                recentTransactions.forEach(transaction => {
-                    const category = categories.find(c => c.id === transaction.categoryId);
-                    const categoryName = category ? category.name : 'Sin categoría';
-                    const typeClass = transaction.type === 'income' ? 'text-success' : 'text-danger';
-                    const sign = transaction.type === 'income' ? '+' : '-';
-                    
-                    html += `
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <div>
-                                <div class="fw-bold">${transaction.description}</div>
-                                <small class="text-muted">${categoryName} • ${window.AhorrandoGano.Utils.formatDate(transaction.date)}</small>
-                            </div>
-                            <div class="${typeClass} fw-bold">
-                                ${sign}${window.AhorrandoGano.Utils.formatCurrency(transaction.amount)}
-                            </div>
-                        </div>
-                    `;
-                });
-
-                container.innerHTML = html;
-            } catch (error) {
-                console.error('Error cargando transacciones recientes:', error);
-            }
-        }
-
-        function updateStatistics() {
-            try {
-                const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
-                const categories = window.AhorrandoGano.TransactionManager.getCategories();
-                
-                // Verificar que los elementos existan antes de usarlos
-                const totalTransactionsEl = document.getElementById('totalTransactions');
-                const totalCategoriesEl = document.getElementById('totalCategories');
-                const currentBalanceEl = document.getElementById('currentBalance');
-                const monthlyIncomeEl = document.getElementById('monthlyIncome');
-                const monthlyExpensesEl = document.getElementById('monthlyExpenses');
-                
-                if (!totalTransactionsEl || !totalCategoriesEl || !currentBalanceEl || !monthlyIncomeEl || !monthlyExpensesEl) {
-                    console.warn('Algunos elementos de estadísticas no se encontraron en el DOM');
-                    return;
-                }
-
-                // Calcular balance
-                const balance = window.AhorrandoGano.TransactionManager.calculateBalance(currentUser.id);
-                
-                // Estadísticas básicas
-                totalTransactionsEl.textContent = transactions.length;
-                totalCategoriesEl.textContent = categories.length;
-                currentBalanceEl.textContent = window.AhorrandoGano.Utils.formatCurrency(balance.balance);
-                
-                // Calcular transacciones del mes actual
-                const now = new Date();
-                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                const monthTransactions = transactions.filter(t => new Date(t.date) >= monthStart);
-                
-                const monthlyIncome = monthTransactions
-                    .filter(t => t.type === 'income')
-                    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-                
-                const monthlyExpenses = monthTransactions
-                    .filter(t => t.type === 'expense')
-                    .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-
-                monthlyIncomeEl.textContent = window.AhorrandoGano.Utils.formatCurrency(monthlyIncome);
-                monthlyExpensesEl.textContent = window.AhorrandoGano.Utils.formatCurrency(monthlyExpenses);
-
-                // Actualizar barras de progreso si existen
+                // Actualizar barras de progreso para el resumen financiero
                 const balanceProgressEl = document.getElementById('balanceProgress');
                 const incomeProgressEl = document.getElementById('incomeProgress');
                 const expensesProgressEl = document.getElementById('expensesProgress');
                 
-                const maxAmount = Math.max(monthlyIncome, monthlyExpenses, Math.abs(balance.balance));
-                if (maxAmount > 0 && balanceProgressEl && incomeProgressEl && expensesProgressEl) {
-                    balanceProgressEl.style.width = Math.min(100, (Math.abs(balance.balance) / maxAmount) * 100) + '%';
-                    incomeProgressEl.style.width = (monthlyIncome / maxAmount) * 100 + '%';
-                    expensesProgressEl.style.width = (monthlyExpenses / maxAmount) * 100 + '%';
+                if (balanceProgressEl && incomeProgressEl && expensesProgressEl) {
+                    const maxAmount = Math.max(monthlyIncome, monthlyExpenses, Math.abs(balance) || 0);
+                    if (maxAmount > 0) {
+                        balanceProgressEl.style.width = Math.min(100, (Math.abs(balance) / maxAmount) * 100) + '%';
+                        incomeProgressEl.style.width = (monthlyIncome / maxAmount) * 100 + '%';
+                        expensesProgressEl.style.width = (monthlyExpenses / maxAmount) * 100 + '%';
+                    } else {
+                        balanceProgressEl.style.width = '0%';
+                        incomeProgressEl.style.width = '0%';
+                        expensesProgressEl.style.width = '0%';
+                    }
                 }
             } catch (error) {
-                console.error('Error actualizando estadísticas:', error);
+                // Console output removed
             }
         }
+
+
+
+
 
         function loadRecentActivity() {
             try {
                 const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
-                const categories = window.AhorrandoGano.TransactionManager.getCategories();
+                const categories = window.AhorrandoGano.CategoryManager.getUserCategories(currentUser.id);
                 
                 const containerEl = document.getElementById('recentActivity');
                 if (!containerEl) {
-                    console.warn('Elemento recentActivity no encontrado');
+                    // Console output removed
                     return;
                 }
                 
                 // Obtener las últimas 5 transacciones
                 const recentTransactions = transactions
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .slice(0, 5);
 
                 if (recentTransactions.length === 0) {
@@ -692,54 +644,11 @@
 
                 containerEl.innerHTML = html;
             } catch (error) {
-                console.error('Error cargando transacciones recientes:', error);
+                // Console output removed
             }
         }
 
-        function loadRecentActivity() {
-            const transactions = window.AhorrandoGano.TransactionManager.getUserTransactions(currentUser.id);
-            const categories = window.AhorrandoGano.TransactionManager.getCategories();
-            
-            // Obtener las últimas 5 transacciones
-            const recentTransactions = transactions
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                .slice(0, 5);
 
-            if (recentTransactions.length === 0) {
-                document.getElementById('recentActivity').innerHTML = 
-                    '<p class="text-muted text-center">No hay actividad reciente</p>';
-                return;
-            }
-
-            const html = recentTransactions.map(transaction => {
-                const category = categories.find(c => c.id === transaction.categoryId);
-                const categoryName = category ? category.name : 'Sin categoría';
-                const typeClass = transaction.type === 'income' ? 'success' : 'danger';
-                const typeIcon = transaction.type === 'income' ? 'fa-arrow-up' : 'fa-arrow-down';
-                
-                return `
-                    <div class="d-flex align-items-center mb-3 p-2 border rounded">
-                        <div class="me-3">
-                            <div class="bg-${typeClass} rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="fas ${typeIcon} text-white"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold">${transaction.description}</div>
-                            <small class="text-muted">${categoryName} • ${window.AhorrandoGano.Utils.formatDate(transaction.date)}</small>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold text-${typeClass}">
-                                ${transaction.type === 'expense' ? '-' : '+'}${window.AhorrandoGano.Utils.formatCurrency(transaction.amount)}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            document.getElementById('recentActivity').innerHTML = html;
-        }
 
         function showEditProfileModal() {
             document.getElementById('editFirstName').value = currentUser.firstName;
@@ -828,9 +737,8 @@
             }
 
             // Validar nueva contraseña
-            const passwordValidation = window.AhorrandoGano.Utils.password(newPassword);
-            if (!passwordValidation.isValid) {
-                window.AhorrandoGano.Utils.showNotification(passwordValidation.message, 'warning');
+            if (newPassword.length < 6) {
+                window.AhorrandoGano.Utils.showNotification('La contraseña debe tener al menos 6 caracteres', 'warning');
                 return;
             }
 

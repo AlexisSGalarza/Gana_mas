@@ -173,7 +173,7 @@
         }
 
         // Manejar envío del formulario de login
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             
             // Esperar a que el sistema esté listo
@@ -196,14 +196,14 @@
             }
             
             try {
-                const result = window.AhorrandoGano.UserManager.login(email, password);
+                const result = await window.AhorrandoGano.UserManager.login(email, password);
                 
                 if (result.success) {
                     Swal.fire({
                         icon: 'success',
                         title: '¡Bienvenido!',
                         text: `Hola ${result.user.firstName}`,
-                        timer: 2000,
+                        timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
                         window.location.href = 'dashboard.html';
@@ -212,11 +212,11 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Error de autenticación',
-                        text: result.error || 'Email o contraseña incorrectos'
+                        text: result.error
                     });
                 }
             } catch (error) {
-                console.error('Error en login:', error);
+                // Error en login
                 Swal.fire({
                     icon: 'error',
                     title: 'Error del sistema',

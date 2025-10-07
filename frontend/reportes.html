@@ -203,9 +203,10 @@
                     <div class="col-md-3">
                         <label class="form-label">Período</label>
                         <select class="form-select" id="periodFilter">
+                            <option value="all">Todas las transacciones</option>
+                            <option value="year">Este año</option>
                             <option value="month">Este mes</option>
                             <option value="quarter">Este trimestre</option>
-                            <option value="year">Este año</option>
                             <option value="custom">Personalizado</option>
                         </select>
                     </div>
@@ -462,8 +463,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.js"></script>
     
     <!-- Aplicación principal -->
+    <!-- Scripts necesarios -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/utils.js"></script>
     
     <script>
         // Variables globales
@@ -477,6 +480,7 @@
                 if (window.AhorrandoGano && window.AhorrandoGano.UserManager) {
                     // Verificar autenticación
                     const user = window.AhorrandoGano.UserManager.getCurrentUser();
+                    
                     if (!user) {
                         window.location.href = 'login.html';
                         return;
@@ -494,18 +498,9 @@
         });
 
         function initializePage() {
-            // Mostrar email del usuario
-            const user = window.AhorrandoGano.UserManager.getCurrentUser();
-            if (user) {
-                // document.getElementById('userEmail').textContent = user.email; // Elemento no existe
-                console.log('Usuario:', user.email);
-            }
-
-            // Establecer fechas por defecto
-            const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-            document.getElementById('dateFrom').valueAsDate = firstDay;
-            document.getElementById('dateTo').valueAsDate = now;
+            // Establecer período por defecto a "Todas las transacciones"
+            document.getElementById('periodFilter').value = 'all';
+            setPeriodDates('all');
         }
 
         function setupEventListeners() {
@@ -523,19 +518,32 @@
 
         function setPeriodDates(period) {
             const now = new Date();
-            let fromDate, toDate = now;
+            let fromDate, toDate;
 
             switch(period) {
                 case 'month':
                     fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    // Último día del mes actual
+                    toDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
                     break;
                 case 'quarter':
                     const quarterStart = Math.floor(now.getMonth() / 3) * 3;
                     fromDate = new Date(now.getFullYear(), quarterStart, 1);
+                    // Último día del trimestre
+                    toDate = new Date(now.getFullYear(), quarterStart + 3, 0);
                     break;
                 case 'year':
                     fromDate = new Date(now.getFullYear(), 0, 1);
+                    // Último día del año actual
+                    toDate = new Date(now.getFullYear(), 11, 31);
                     break;
+                case 'all':
+                    // Mostrar todas las transacciones desde hace 2 años hasta dentro de 1 año
+                    fromDate = new Date(now.getFullYear() - 2, 0, 1);
+                    toDate = new Date(now.getFullYear() + 1, 11, 31);
+                    break;
+                default:
+                    toDate = now;
             }
 
             document.getElementById('dateFrom').valueAsDate = fromDate;
@@ -545,13 +553,11 @@
         function updateReports() {
             try {
                 if (!window.AhorrandoGano || !window.AhorrandoGano.UserManager) {
-                    console.error('Sistema no disponible para reportes');
                     return;
                 }
                 
                 const user = window.AhorrandoGano.UserManager.getCurrentUser();
                 if (!user) {
-                    console.error('Usuario no encontrado para reportes');
                     return;
                 }
 
@@ -560,6 +566,7 @@
 
                 // Obtener transacciones en el rango de fechas
                 const allTransactions = window.AhorrandoGano.TransactionManager.getUserTransactions(user.id);
+                
                 currentTransactions = allTransactions.filter(t => {
                     const transactionDate = t.date.split('T')[0];
                     return transactionDate >= fromDate && transactionDate <= toDate;
@@ -573,10 +580,12 @@
                 generateTopCategories();
                 generateInsights();
                 
-                console.log(`Reporte actualizado: ${currentTransactions.length} transacciones`);
             } catch (error) {
-                console.error('Error actualizando reportes:', error);
-                window.AhorrandoGano.Utils.showNotification('Error generando reportes', 'error');
+                if (window.AhorrandoGano && window.AhorrandoGano.Utils) {
+                    window.AhorrandoGano.Utils.showNotification('Error generando reportes', 'error');
+                } else {
+                    alert('Error generando reportes: ' + error.message);
+                }
             }
         }
 
@@ -592,15 +601,35 @@
             const balance = income - expenses;
             const savingsRate = income > 0 ? ((balance / income) * 100) : 0;
 
+            // Verificar que los elementos existen
+            const totalIncomeEl = document.getElementById('totalIncome');
+            const totalExpensesEl = document.getElementById('totalExpenses');
+            const netBalanceEl = document.getElementById('netBalance');
+            const savingsRateEl = document.getElementById('savingsRate');
+
+            if (!totalIncomeEl || !totalExpensesEl || !netBalanceEl || !savingsRateEl) {
+                return;
+            }
+
             // Actualizar UI
-            document.getElementById('totalIncome').textContent = window.AhorrandoGano.Utils.formatCurrency(income);
-            document.getElementById('totalExpenses').textContent = window.AhorrandoGano.Utils.formatCurrency(expenses);
-            document.getElementById('netBalance').textContent = window.AhorrandoGano.Utils.formatCurrency(balance);
-            document.getElementById('savingsRate').textContent = savingsRate.toFixed(1) + '%';
+            if (window.AhorrandoGano && window.AhorrandoGano.Utils) {
+                totalIncomeEl.textContent = window.AhorrandoGano.Utils.formatCurrency(income);
+                totalExpensesEl.textContent = window.AhorrandoGano.Utils.formatCurrency(expenses);
+                netBalanceEl.textContent = window.AhorrandoGano.Utils.formatCurrency(balance);
+            } else {
+                // Formato básico si Utils no está disponible
+                totalIncomeEl.textContent = '$' + income.toFixed(2);
+                totalExpensesEl.textContent = '$' + expenses.toFixed(2);
+                netBalanceEl.textContent = '$' + balance.toFixed(2);
+            }
+            
+            savingsRateEl.textContent = savingsRate.toFixed(1) + '%';
 
             // Cambiar color del balance según el valor
-            const balanceCard = document.getElementById('netBalance').closest('.card');
-            balanceCard.className = balance >= 0 ? 'card bg-info text-white' : 'card bg-warning text-white';
+            const balanceCard = netBalanceEl.closest('.card');
+            if (balanceCard) {
+                balanceCard.className = balance >= 0 ? 'card bg-info text-white' : 'card bg-warning text-white';
+            }
 
             reportData = { income, expenses, balance, savingsRate };
         }

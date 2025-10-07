@@ -185,10 +185,9 @@
         let selectedIconValue = '📁';
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Iniciando categorías...');
             
             if (!window.AhorrandoGano) {
-                console.error('AhorrandoGano no disponible');
+                // AhorrandoGano no disponible
                 showError('Sistema no disponible');
                 return;
             }
@@ -224,7 +223,6 @@
                 let categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
                 
                 if (categories.length === 0) {
-                    console.log('Creando categorías predeterminadas...');
                     window.AhorrandoGano.CategoryManager.initDefaultCategories(user.id);
                     categories = window.AhorrandoGano.CategoryManager.getUserCategories(user.id);
                 }
@@ -232,7 +230,7 @@
                 renderCategories(categories);
                 
             } catch (error) {
-                console.error('Error:', error);
+                // Error
                 showError('Error al cargar categorías: ' + error.message);
             }
         }
@@ -352,7 +350,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Error eliminando categoría:', error);
+                // Error eliminando categoría
                 window.AhorrandoGano.Utils.showNotification('Error al eliminar categoría', 'error');
             }
         }

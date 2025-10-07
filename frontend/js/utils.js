@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!window.Swal || !window.Swal.fire) missingLibraries.push('SweetAlert2');
     
     if (missingLibraries.length > 0) {
-        console.warn('⚠️ Librerías faltantes:', missingLibraries.join(', '));
+        // Librerías faltantes detectadas
         
         // Mostrar aviso después de un breve delay
         setTimeout(() => {
